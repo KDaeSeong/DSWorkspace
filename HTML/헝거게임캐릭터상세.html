@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헝거게임이벤트</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/헝거게임캐릭터상세.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginCheck = localStorage.getItem('loginCheck') === "true";
+            if (loginCheck) {
+                document.getElementById("openLogin").innerHTML = "내 정보";
+                document.getElementById("openSignIn").innerText = "로그아웃";
+                document.getElementById("login").style.cursor = "pointer";
+            }else {
+                document.getElementById("openLogin").innerText = "로그인";
+                document.getElementById("openSignIn").innerText = "회원가입";
+                document.getElementById("login").style.cursor = "pointer";
+                }
+            });
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <section id="header-id1">
+                <ul>
+                    <li><a href="#">
+                        <img src="../이미지/헝거게임.webp" alt="" width="40%">
+                    </a></li>
+                    <li><a href="헝거게임메인.html">메인</a></li>
+                    <li><a href="헝거게임캐릭터.html">캐릭터 설정</a></li>
+                    <li><a href="헝거게임캐릭터상세.html" id="EREvent">캐릭터 상세설정</a></li>
+                    <li><a href="헝거게임이벤트.html">이벤트 설정</a></li>
+                    <li><a href="헝거게임보정치.html">보정치 설정</a></li>
+                </ul>
+                <ul>
+                </ul>
+                <ul id="login">
+                    <li><a id="openLogin"></a></li>
+                    <li><a id="openSignIn"></a></li>
+                </ul>
+            </section>
+        </header>
+        <div class="police-container">
+            <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+            <h1 class="title-text">캐릭터 상세 설정</h1>
+        </div>
+        <div>
+            <!-- <h1>개요</h1> -->
+            <pre>
+                    이곳에서는 캐릭터의 상세 능력치를 설정할 수 있습니다.
+
+
+            </pre>
+        </div>
+        
+        <div>
+            <div class="police-container">
+                <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+                <h1 class="title-text">캐릭터 상세 설정</h1>
+            </div>
+
+        </div>
+        <div id="adEventDiv">
+            <table id="characterTable" border="1">
+                <thead>
+                    <tr>
+                        <th id="name">캐릭터 이름</th>
+                        <th>성별</th>
+                        <th>이미지</th>
+                        <th>체격</th>
+                        <th>힘</th>
+                        <th>민첩성</th>
+                        <th>손재주</th>
+                        <th>손놀림</th>
+                        <th>지략</th>
+                        <th>사격</th>
+                        <th>지구력</th>
+                        <th>초기화</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                    <!-- JSON 데이터에 기반하여 여기에 캐릭터 행 추가 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="saveBtn">
+            <div id="load">
+                <a>
+                    <h1>불러오기</h1>
+                </a>
+            </div>
+            <div id="save">
+                <a>
+                    <h1>저장하기</h1>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="../JS/헝거게임캐릭터상세.js"></script>
+</body>
+</html>

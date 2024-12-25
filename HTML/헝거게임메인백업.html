@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/같은그림찾기.css">
+    <style>
+        body{
+            width: 1200px;
+            height: 1200px;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+            background: whitesmoke;
+            margin: auto;
+        }
+        h1{
+            font-size: 60px;
+            display: flex;
+            justify-content: center;
+            text-align: center;
+        }
+        .mainDiv{
+            width: 1200px;
+            height: 1200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .mainDiv>.mainH1>{
+            width: 1200px;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .random{
+            width: 250px;
+            height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgb(255, 255, 255);
+            border: 1px solid white;
+            margin: 40px 20px;
+            cursor: pointer;
+            color: black;
+        }
+
+        #start{
+            cursor: pointer;
+        }
+    </style>
+    <script>
+       
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <section id="header-id1">
+                <h1>같은그림찾기</h1>
+            </section>
+        </header>
+        <div class="mainDiv">
+            <div class="mainH1">
+                <div id = "random1" class="random"></div>
+                <div id = "random2" class="random"></div>
+                <div id = "random3" class="random"></div>
+                <div id = "random4" class="random"></div>
+            </div>
+            <div class="mainH2">
+                <div id = "random5" class="random"></div>
+                <div id = "random6" class="random"></div>
+                <div id = "random7" class="random"></div>
+                <div id = "random8" class="random"></div>
+            </div>
+            <div class="mainH3">
+                <div id = "random9" class="random"></div>
+                <div id = "random10" class="random"></div>
+                <div id = "random11" class="random"></div>
+                <div id = "random12" class="random"></div>
+            </div>
+            <div class="mainH4">
+                <div id = "random13" class="random"></div>
+                <div id = "random14" class="random"></div>
+                <div id = "random15" class="random"></div>
+                <div id = "random16" class="random"></div>
+            </div>
+        </div>
+
+        
+        <div id="start">
+            <h1>시작하기</h1>
+        </div>
+    </main>
+
+    <script src="../JS/같은그림찾기.js"></script>
+    <script>
+        function name () {
+            const red="red"
+            const orange="orange"
+            const yellow="yellow"
+            const green="green"
+            const lightblue="lightblue"
+            const blue="blue"
+            const purple="purple"
+            const teal="teal"
+
+            let redCount = 0;
+            let orangeCount = 0;
+            let yellowCount = 0;
+            let greenCount = 0;
+            let lightblueCount = 0;
+            let blueCount = 0;
+            let purpledCount = 0;
+            let tealCount = 0;
+
+            let count = 1;
+            
+            const randomDiv = document.getElementsByClassName("random")
+            for (let item of randomDiv){
+                
+            }
+
+        }
+
+    </script>
+</body>
+</html>

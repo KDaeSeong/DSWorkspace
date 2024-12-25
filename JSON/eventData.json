@@ -1,0 +1,42 @@
+[
+  {
+    "textEvent": "%0 플레이어가 %1 플레이어를 둔기를 내리쳐 살해했습니다.",
+    "killer": "0",
+    "killee": "1",
+    "heal": false,
+    "healTarget": "X",
+    "dayNight": "전체"
+  },
+  {
+    "textEvent": "%0 플레이어가 %1 플레이어를 저격했습니다.",
+    "killer": "0",
+    "killee": "1",
+    "heal": false,
+    "healTarget": "X",
+    "dayNight": "밤"
+  },
+  {
+    "textEvent": "%0 플레이어가 %1 플레이어를 교살했습니다.",
+    "killer": "0",
+    "killee": "1",
+    "heal": false,
+    "healTarget": "X",
+    "dayNight": "전체"
+  },
+  {
+    "textEvent": "%0 플레이어가 %1 플레이어를 함정에 빠트렸습니다.",
+    "killer": "0",
+    "killee": "1",
+    "heal": false,
+    "healTarget": "X",
+    "dayNight": "전체"
+  },
+  {
+    "textEvent": "%0 플레이어가 %1 플레이어를 돌팔매로 죽였습니다.",
+    "killer": "0",
+    "killee": "1",
+    "heal": false,
+    "healTarget": "X",
+    "dayNight": "전체"
+  }
+]

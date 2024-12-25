@@ -1,0 +1,219 @@
+body{
+    background-color: rgb(223, 199, 168);
+}
+
+main{
+    width: max-content;
+    height: 2000px;
+    margin:auto;
+    background-color: rgb(223, 199, 168);
+    box-sizing: border-box;
+}
+
+header {
+    width: 100%;
+    height: 100px;
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* 최우선으로 배치 */
+    background: #F6F5EF;
+}
+
+h1{
+    text-align: center;
+    font-weight: bold;
+    font-size: 65px;
+    padding-bottom: 100px;
+    padding-top: 100px;
+}
+
+
+#header-id1{
+    width: 100%;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+}
+
+header ul{
+    justify-content: center;
+    display: flex;
+    list-style: none;
+    height: 100%;
+}
+
+
+header a{
+    font-size: 35px;
+    width: 250px;
+    height: 100%;
+    text-align: center;
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* 글자를 세로 가운데 지정하는 방법 */
+    /* line-height: 45px; */
+    padding-right:16px;
+    padding-left:16px;
+    transition-duration: 0.1s;
+}
+
+.police-container {
+    position: relative;
+    width: 100%;
+    height: 200px; /* 부모 컨테이너 높이 설정 */
+    margin: 100px 0px;
+
+}
+
+.police-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%; /* 부모 높이에 맞게 설정 */
+    z-index: 1; /* 텍스트보다 아래 */
+    object-fit: cover; /* 이미지 비율 유지 */
+}
+
+.title-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1; /* 이미지 뒤에 표시되도록 설정 */
+    font-size: 65px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    text-align: center;
+}
+
+.mainH1 h1 {
+    position: relative;
+    z-index: 1; /* 이미지보다 아래에 나타남 */
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+    font-size: 65px;
+    font-weight: bold;
+}
+
+
+#startGame{
+    width: 300px;
+    height: 100px;
+    background: #4185b3;
+    margin: auto;
+    border-radius: 10%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 200px;
+    cursor: pointer;
+}
+
+#startGame>a{
+    text-decoration: none;
+    color: black;
+    cursor: pointer;
+}
+
+.mainH1>a{
+    text-decoration: none;
+    color: rgb(17, 60, 250);
+}
+
+.mainH1{
+    /* font-family: 'NanumSquareLight'; */
+    /* font-family: 'NanumSquare'; */
+    /* font-family: 'NanumSquareBold'; */
+    /* font-family: 'NanumSquareExtraBold'; */
+    font-family: 'NanumSquareAcb';
+    /* font-family: 'NanumSquareAceb'; */
+    /* font-family: 'NanumSquareAcl'; */
+    /* font-family: 'NanumSquareAcr'; */
+    font-size: 2em;
+    letter-spacing: 2px;
+}
+
+header li:hover{
+    background-color: #333333;
+    color: rgb(255, 255, 255);
+    transition-duration: 0.7s;
+}
+
+header li>a:hover{
+    color: rgb(255, 255, 255);
+    transition-duration: 0.7s;
+}
+
+#ERMain{
+    background-color: #333333;
+    color: rgb(255, 255, 255);
+}
+
+
+#setting{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    margin: auto;
+    font-size: 50px;
+}
+
+#settingH2{
+    display: flex;
+    justify-content: center;
+    margin: 150px 0;
+    font-size: 60px;
+}
+
+
+[type=file]{
+    zoom: 2.5;
+}
+
+#settingChar{
+    display: none;
+}
+#settingEvent{
+    display: none;
+}
+#settingModifier{
+    display: none;
+}
+
+/* 파일 업로드 버튼 스타일 */
+.file-upload-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 50px 0px;
+}
+
+.upload-btn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.upload-btn:hover {
+    background-color: #45a049;
+}
+
+.file-name {
+    font-size: 14px;
+    color: #555;
+}

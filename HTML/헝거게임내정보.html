@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헝거게임 내정보</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/헝거게임내정보.css">
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginCheck = localStorage.getItem('loginCheck') === "true";
+            if (loginCheck) {
+                document.getElementById("openLogin").innerHTML = "내 정보";
+                document.getElementById("openLogin").style.backgroundColor = "#333333";
+                document.getElementById("openLogin").style.color = "rgb(255, 255, 255)";
+                document.getElementById("openSignIn").innerText = "로그아웃";
+                document.getElementById("login").style.cursor = "pointer";
+            }else {
+                document.getElementById("openLogin").innerText = "로그인";
+                document.getElementById("openSignIn").innerText = "회원가입";
+                document.getElementById("login").style.cursor = "pointer";
+                }
+            });
+    </script>
+    <style>
+        #modifyPopup{
+        display: none;
+         position: fixed; 
+         top: 10%; 
+         left: 50%; 
+         transform: translate(-50%, 0); 
+         width: 500px; 
+         background-color: white; 
+         padding: 20px; 
+         border: 1px solid #ccc; 
+         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        Kakao.init('e1f4e88f1a2ae0857755b12f7859b566');
+    </script>
+    <main>
+        <header>
+            <section id="header-id1">
+                <ul>
+                    <li><a href="#">
+                        <img src="../이미지/헝거게임.webp" alt="" width="40%">
+                    </a></li>
+                    <li ><a href="헝거게임메인.html">메인</a></li>
+                    <li><a href="헝거게임캐릭터.html">캐릭터 설정</a></li>
+                    <li><a href="헝거게임캐릭터상세.html" id="settingCharDetail">캐릭터 상세설정</a></li>
+                    <li><a href="헝거게임이벤트.html">이벤트 설정</a></li>
+                    <li><a href="헝거게임보정치.html">보정치 설정</a></li>
+                </ul>
+                <ul>
+                </ul>
+                <ul id="login">
+                    <li><a id="openLogin" id="myProfile"></a></li>
+                    <li><a id="openSignIn"></a></li>
+                </ul>
+            </section>
+        </header>
+        <h1 class="myProfileH1">내 정보</h1>
+        <fieldset>
+            <div class="myProfileList">
+            </div>
+        </fieldset>
+        
+        <div id="modifyMyProfile">
+            <a id="openModifyPopup" onclick="openModifyPopup()">
+                <h1>수정하기</h1>
+            </a>
+        </div>
+    
+
+        <div id="modifyPopup">
+            <h2>정보 수정</h2>
+            <form id="modifyForm">
+                <label for="modifyName">이름:</label>
+                <input type="text" id="modifyName"><br><br>
+        
+                <label for="modifyAge">나이:</label>
+                <input type="number" id="modifyAge" min="7" max="120"><br><br>
+        
+                <label for="modifyGender">성별:</label>
+                <input type="radio" name="modifyGender" id="modifyMale" value="남"> 남
+                <input type="radio" name="modifyGender" id="modifyFemale" value="여"> 여<br><br>
+        
+                <label for="modifyJob">직업:</label>
+                <select id="modifyJob">
+                    <option value="no-job">무직</option>
+                    <option value="developer">개발자</option>
+                    <option value="student">학생</option>
+                    <option value="public-official">공무원</option>
+                    <option value="accountant">회계사</option>
+                    <option value="lawyer">변호사</option>
+                    <option value="prosecutor">검사</option>
+                    <option value="fire-fighter">소방관</option>
+                    <option value="police">경찰관</option>
+                    <option value="worker">회사원</option>
+                    <option value="freelancer">프리랜서</option>
+                    <option value="ceo">자영업자</option>
+                </select><br><br>
+        
+                <label for="modifyHobbies">취미:</label>
+                <label>운동<input type="checkbox" name="hobby" id="sport"></label>
+                <label>게임<input type="checkbox" name="hobby" id="game"></label>
+                <label>독서<input type="checkbox" name="hobby" id="reading"></label>
+                <label>음악감상<input type="checkbox" name="hobby" id="music"></label>
+                <label>그림<input type="checkbox" name="hobby" id="painting"></label>
+                <label>여행<input type="checkbox" name="hobby" id="travel"></label>
+                <label>기타<input type="checkbox" name="hobby" id="etc"></label><br><br>
+        
+                <label for="modifyPhone">전화번호:</label>
+                <input type="text" id="modifyPhone"><br><br>
+        
+                <label for="modifyEmail">이메일:</label>
+                <input type="email" id="modifyEmail"><br><br>
+        
+                <label for="modifyAddress">주소:</label>
+                <button type="button" id="searchAddress" onclick="searchAddress()">주소 검색</button>
+                <div id="addressLayer" style="display:none; position:fixed; z-index:9999; padding:10px; background:#fff; border:1px solid #ddd;"></div>
+                <div id="modifyAddress"></div>
+                <input type="text" id="modifyExtraAddress" placeholder="상세 주소"><br><br>
+                <br>
+                <button type="submit">저장</button>
+                <button type="button" id="closePopup">닫기</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="../JS/헝거게임내정보.js"></script>
+    <script>
+        // 팝업 열기
+        function openModifyPopup() {
+        const loginId = localStorage.getItem("loginId");
+        const userList = localStorage.getItem("userList");
+        const users = JSON.parse(userList);
+        const user = users.find(u => String(u.id) === String(loginId));
+
+        if (user) {
+            // 기존 정보로 폼 채우기
+            document.getElementById('modifyName').value = user.name || '';
+            document.getElementById('modifyAge').value = user.age || '';
+            document.getElementById(user.gender === '남' ? 'modifyMale' : 'modifyFemale').checked = true;
+            document.getElementById('modifyJob').value = user.job || '';
+            document.querySelectorAll('input[name="hobby"]').forEach(checkbox => {
+                checkbox.checked = user.hobbies.includes(checkbox.id.replace('modify', '').toLowerCase());
+            });
+            document.getElementById('modifyPhone').value = user.phone || '';
+            document.getElementById('modifyEmail').value = user.email || '';
+            document.getElementById('modifyExtraAddress').value = user.address || '';
+
+            // 팝업 표시
+            document.getElementById('modifyPopup').style.display = 'block';
+        } else {
+            alert('로그인한 회원 정보를 찾을 수 없습니다.');
+        }
+    }
+
+    // 팝업 닫기
+    document.getElementById('closePopup').addEventListener('click', () => {
+        document.getElementById('modifyPopup').style.display = 'none';
+    });
+
+    // 폼 제출 처리
+    document.getElementById('modifyForm').addEventListener('submit', function (event) {
+            event.preventDefault(); // 기본 폼 동작 막기
+
+            const loginId = localStorage.getItem("loginId");
+            const userList = localStorage.getItem("userList");
+            const users = JSON.parse(userList);
+
+            // 현재 로그인한 사용자 찾기
+            const userIndex = users.findIndex(u => String(u.id) === String(loginId));
+
+            if (userIndex !== -1) {
+                // 사용자 정보 업데이트
+                users[userIndex] = {
+                    ...users[userIndex],
+                    name: document.getElementById('modifyName').value,
+                    age: document.getElementById('modifyAge').value,
+                    gender: document.querySelector('input[name="modifyGender"]:checked').value,
+                    job: document.getElementById('modifyJob').value, // 직업 필드 값 가져오기
+                    hobbies: Array.from(document.querySelectorAll('input[name="hobby"]:checked'))
+                        .map(checkbox => checkbox.labels[0].innerText), // 체크된 취미 텍스트 가져오기
+                    phone: document.getElementById('modifyPhone').value,
+                    email: document.getElementById('modifyEmail').value,
+                    address: document.getElementById('modifyExtraAddress').value
+                };
+
+                // 업데이트된 데이터 저장
+                localStorage.setItem('userList', JSON.stringify(users));
+
+                // UI 업데이트
+                displayMyProfile();
+
+                // 팝업 닫기
+                document.getElementById('modifyPopup').style.display = 'none';
+
+                alert('정보가 성공적으로 수정되었습니다!');
+            } else {
+                alert('회원 정보를 찾을 수 없습니다.');
+            }
+        });
+        function searchAddress() {
+            new daum.Postcode({
+                oncomplete: function (data) {
+                    // 팝업에서 검색 결과 선택 시 실행
+                    let fullAddr = data.address; // 기본 주소
+                    let extraAddr = '';
+
+                    // 참고 항목 추가
+                    if (data.addressType === 'R') {
+                        if (data.bname !== '') extraAddr += data.bname;
+                        if (data.buildingName !== '') extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                        fullAddr += (extraAddr !== '' ? ' (' + extraAddr + ')' : '');
+                    }
+
+                    // 폼에 값 입력
+                    document.getElementById('modifyAddress').value = fullAddr;
+
+                    // 상세 주소 입력창으로 포커스 이동
+                    document.getElementById('modifyExtraAddress').focus();
+                },
+                width: '100%',
+                height: '100%'
+            }).open({
+                popupName: 'addressLayer'
+            });
+        }
+
+    </script>
+</body>
+</html>

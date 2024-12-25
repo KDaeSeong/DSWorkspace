@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>헝거게임보정치</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/헝거게임보정치.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginCheck = localStorage.getItem('loginCheck') === "true";
+            if (loginCheck) {
+                document.getElementById("openLogin").innerHTML = "내 정보";
+                document.getElementById("openSignIn").innerText = "로그아웃";
+                document.getElementById("login").style.cursor = "pointer";
+            }else {
+                document.getElementById("openLogin").innerText = "로그인";
+                document.getElementById("openSignIn").innerText = "회원가입";
+                document.getElementById("login").style.cursor = "pointer";
+                }
+            });
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <section id="header-id1">
+                <ul>
+                    <li><a href="#">
+                        <img src="../이미지/헝거게임.webp" alt="" width="40%">
+                    </a></li>
+                    <li><a href="헝거게임메인.html">메인</a></li>
+                    <li><a href="헝거게임캐릭터.html">캐릭터 설정</a></li>
+                    <li><a href="헝거게임캐릭터상세.html" id="settingCharDetail">캐릭터 상세설정</a></li>
+                    <li><a href="헝거게임이벤트.html">이벤트 설정</a></li>
+                    <li><a href="헝거게임보정치.html" id="ERModifier">보정치 설정</a></li>
+                </ul>
+                <ul>
+                </ul>
+                <ul id="login">
+                    <li><a id="openLogin"></a></li>
+                    <li><a id="openSignIn"></a></li>
+                </ul>
+            </section>
+        </header>
+        <div class="police-container">
+            <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+            <h1 class="title-text">보정치</h1>
+        </div>
+        <div>
+            <!-- <h1>개요</h1> -->
+            <pre id="outline">
+이곳에서는 캐릭터의 속성과 이벤트 보정치를 설정할 수 있습니다.
+                
+
+
+보정치에 따라 생존 확률이 달라지니 신중하게 보정치를 정하세요.
+            </pre>
+        </div>
+        <div class="police-container">
+            <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+            <h1 class="title-text">보정치 수정</h1>
+        </div>
+        <div id="modifierTable">
+            <table width = "2200px" height = "1800px" border="1px solid"> 
+                <tbody>
+                    <tr class="tableClass" >
+                        <th width="850px">전투력 계수(높을수록 전투력이 더 강해짐)</th>
+                        <th>
+                            <input type="number" id="combatModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                        <th>방어력 계수(높을수록 방어력이 더 강해짐)</th>
+                        <th>
+                            <input type="number" id="defenseModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>생명력 계수(높을수록 생명력이 더 높아짐)</th>
+                        <th>
+                            <input type="number" id="vitalityModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                        <th>정신력 계수(높을수록 정신력이 더 강해짐)</th>
+                        <th>
+                            <input type="number" id="spiritModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>지능 계수(높을수록 지능이 더 높아짐)</th>
+                        <th>
+                            <input type="number" id="intelligenceModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                        <th>지구력 계수(높을수록 지구력이 더 강해짐)</th>
+                        <th>
+                            <input type="number" id="staminaModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>동물 전투력 계수(높을수록 동물의 전투력이 더 강해짐)</th>
+                        <th>
+                            <input type="number" id="animalModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                        <th>식물 위험 계수(높을수록 야생 식물을 먹었을 경우 식중독에 걸릴 확률이 높아짐)</th>
+                        <th>
+                            <input type="number" id="weedModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>요리 성공 계수(높을수록 요리 성공 확률이 더 높아짐)</th>
+                        <th>
+                            <input type="number" id="cookingModifier" value=1.0 step=0.1 min=0.1 max=2.0>
+                        </th>
+                        <th>손재주 보정(체크 시 여성 캐릭터의 손재주 보정치가 활성화됨)</th>
+                        <th>
+                            <input type="checkbox" id="handinessModifier" checked>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>사냥 보정(체크 시 남성 캐릭터의 사냥 보정치가 활성화됨)</th>
+                        <th>
+                            <input type="checkbox" id="huntingModifier" checked>
+                        </th>
+                        <th>기후 보정(체크 시 날씨에 따른 능력치 페널티 활성화)</th>
+                        <th>
+                            <input type="checkbox" id="climateModifier" checked>
+                        </th>
+                    </tr>
+                    <tr class="tableClass">
+                        <th>아이템 보정(체크 시 캐릭터 능력에 따라 아이템 효과가 일부 달라짐)</th>
+                        <th>
+                            <input type="checkbox" id="huntingModifier" checked>
+                        </th>
+                        <th>장비 보정(체크 시 장비 착용 조건이 활성화되며 캐릭터 능력에 따라 장비 효과가 일부 달라짐)</th>
+                        <th>
+                            <input type="checkbox" id="climateModifier" checked>
+                        </th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="saveBtn">
+            <div id="load">
+                <a>
+                    <h1>불러오기</h1>
+                </a>
+            </div>
+            <div id="save">
+                <a>
+                    <h1>저장하기</h1>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="../JS/헝거게임보정치.js"></script>
+</body>
+</html>
