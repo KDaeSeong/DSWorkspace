@@ -91,27 +91,12 @@
         
         
         <div id="settingH2">
-            <h2>JSON 파일 불러오기</h2>
+            <h2>JSON 파일 업로드 확인</h2>
         </div>
         <div id="setting">
-            <div class="file-upload-container">
-                캐릭터 JSON 업로드 <button id="uploadCharacterBtn" class="upload-btn">업로드</button>
-                <input type="file" id="characterJson" accept=".json" style="display: none;">
-            </div>
-            <div class="file-upload-container">
-                이벤트 JSON 업로드 <button id="uploadEventBtn" class="upload-btn">업로드</button>
-                <input type="file" id="eventJson" accept=".json" style="display: none;">
-            </div>
-            <div class="file-upload-container">
-                보정치 JSON 업로드 <button id="uploadModifierBtn" class="upload-btn">업로드</button>
-                <input type="file" id="modifierJson" accept=".json" style="display: none;">
-            </div>
-            <!--                 
-            <input type="file" id="characterJson" accept=".json"><br><br>
-
-            <input type="file" id="eventJson" accept=".json"><br><br>
-
-            <input type="file" id="modifierJson" accept=".json"><br><br> -->
+            <div class="file-upload-container" id="charStatus">캐릭터 JSON 업로드</div>
+            <div class="file-upload-container" id="eventStatus">이벤트 JSON 업로드</div>
+            <div class="file-upload-container" id="modifierStatus">보정치 JSON 업로드</div>
             <a id="startGame">
                 <h1>시작하기</h1>
             </a>

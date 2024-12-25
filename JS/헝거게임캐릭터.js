@@ -51,7 +51,7 @@ window.addEventListener("storage", function (event) {
 
 // IndexedDB 설정
 const DB_NAME = "HungerGameCharacterData";
-const DB_VERSION = 4;
+const DB_VERSION = 1;
 
 // IndexedDB 초기화
 function initIndexedDB() {

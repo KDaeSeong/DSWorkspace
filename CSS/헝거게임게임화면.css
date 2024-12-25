@@ -156,3 +156,9 @@ header h1, .event-text {
 .event-content {
     font-family: 'NanumSquareAcb';
 }
+
+#day-night-display.night-mode {
+    background-color: rgba(0, 0, 0, 0.8); /* 어두운 배경 */
+    color: white; /* 텍스트를 흰색으로 변경 */
+    transition: background-color 0.5s ease; /* 부드러운 전환 효과 */
+}

@@ -297,159 +297,119 @@ window.addEventListener("storage", function (event) {
 });
 
 
-// JSON 업로드 상태 체크를 위한 변수
-let uploadedFiles = {
-    characterJson: null,
-    eventJson: null,
-    modifierJson: null,
-};
 
-// 파일 읽기 함수
-function readFile(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(file);
-    });
-}
-
-// 파일 업로드 버튼에 이벤트 추가
-document.getElementById("uploadCharacterBtn").addEventListener("click", () => {
-    document.getElementById("characterJson").click(); // 파일 선택창 열기
-});
-
-document.getElementById("uploadEventBtn").addEventListener("click", () => {
-    document.getElementById("eventJson").click(); // 파일 선택창 열기
-});
-
-document.getElementById("uploadModifierBtn").addEventListener("click", () => {
-    document.getElementById("modifierJson").click(); // 파일 선택창 열기
-});
-
-// 파일 변경 이벤트 처리
-document.querySelectorAll("input[type='file']").forEach((input) => {
-    input.addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            alert("파일을 선택하세요.");
-            return;
-        }
-
-        // 파일 ID 매핑
-        const id = event.target.id; // characterJson, eventJson, modifierJson
-
-        try {
-            const fileContent = await readFile(file);
-            const data = JSON.parse(fileContent);
-
-            // 파일별 데이터 검증
-            if (id === "characterJson") {
-                if (!Array.isArray(data) || !data.every((item) => item.gender && typeof item.gender === "string")) {
-                    alert("올바른 캐릭터 JSON 파일이 아닙니다.");
-                    clearFileInput(event.target);
-                    return;
-                }
-            } else if (id === "eventJson") {
-                if (!Array.isArray(data) || !data.every((item) => item.killer && typeof item.killer === "string")) {
-                    alert("올바른 이벤트 JSON 파일이 아닙니다.");
-                    clearFileInput(event.target);
-                    return;
-                }
-            } else if (id === "modifierJson") {
-                if (
-                    typeof data !== "object" ||
-                    data === null ||
-                    !("handiness" in data) ||
-                    typeof data.handiness !== "boolean"
-                ) {
-                    alert("올바른 보정치 JSON 파일이 아닙니다.");
-                    clearFileInput(event.target);
-                    return;
-                }
-            }
-
-            // IndexedDB에 저장
-            await saveToIndexedDB(id, data);
-
-            alert(`${file.name} 데이터를 성공적으로 업로드했습니다.`);
-        } catch (error) {
-            alert("JSON 파일을 읽거나 처리하는 중 오류가 발생했습니다. 파일 형식을 확인하세요.");
-            console.error(error);
-            clearFileInput(event.target);
-        }
-    });
-});
-
-// 파일 입력 제거 함수
-function clearFileInput(input) {
-    input.value = ""; // 파일 입력값 초기화
-    if (!input.value) {
-        // 브라우저 호환성 확인
-        input.type = ""; // 임시로 type 변경
-        input.type = "file"; // 다시 파일 입력으로 설정
-    }
-}
-
-// 스토어에 저장
-async function restoreUploadedFiles() {
-    try {
-        const characterData = await loadFromIndexedDB("characterJson");
-        const eventData = await loadFromIndexedDB("eventJson");
-        const modifierData = await loadFromIndexedDB("modifierJson");
-
-        if (characterData) {
-            uploadedFiles.characterJson = characterData;
-            document.getElementById("characterJson").previousElementSibling.textContent = "파일 업로드 완료";
-        }
-
-        if (eventData) {
-            uploadedFiles.eventJson = eventData;
-            document.getElementById("eventJson").previousElementSibling.textContent = "파일 업로드 완료";
-        }
-
-        if (modifierData) {
-            uploadedFiles.modifierJson = modifierData;
-            document.getElementById("modifierJson").previousElementSibling.textContent = "파일 업로드 완료";
-        }
-
-        console.log("IndexedDB에서 파일 데이터를 복원했습니다.");
-    } catch (error) {
-        console.error("IndexedDB에서 데이터를 복원하는 중 오류 발생:", error);
-    }
-}
-
-// 페이지 로드 시 복원 호출
-document.addEventListener("DOMContentLoaded", restoreUploadedFiles);
 
 
 // 시작하기 버튼 클릭 시 데이터 검증 및 게임 화면으로 데이터 전달
+// IndexedDB 데이터 확인 함수// IndexedDB 데이터 초기화 및 로드 함수
+async function loadIndexedDB(dbName, storeName, key) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(dbName);
+
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            const transaction = db.transaction(storeName, "readonly");
+            const store = transaction.objectStore(storeName);
+            const getRequest = key ? store.get(key) : store.getAll();
+
+            getRequest.onsuccess = () => resolve(getRequest.result || []);
+            getRequest.onerror = () => reject(getRequest.error);
+        };
+
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
+// 4개의 IndexedDB 상태 확인
+async function checkDataStatus() {
+    try {
+        async function debugIndexedDB() {
+            try {
+                const characters = await loadIndexedDB("HungerGameCharacterData", "characters");
+                console.log("HungerGameCharacterData:", characters);
+        
+                const events = await loadIndexedDB("HungerGameEventData", "events");
+                console.log("HungerGameEventData:", events);
+        
+                const charDetails = await loadIndexedDB("HungerGameCharDetailsData", "charDetails");
+                console.log("HungerGameCharDetailsData:", charDetails);
+        
+                const modifiers = await loadIndexedDB("HungerGameModifierData", "modifiers");
+                console.log("HungerGameModifierData:", modifiers);
+            } catch (error) {
+                console.error("IndexedDB 디버깅 중 오류 발생:", error);
+            }
+        }
+        
+        // 호출
+        debugIndexedDB();
+        
+        const charDetails = await loadIndexedDB("HungerGameCharDetailsData", "charDetails");
+        const characters = await loadIndexedDB("HungerGameCharacterData", "characters", "charactersData");
+        const events = await loadIndexedDB("HungerGameEventData", "events", "eventsData");
+        const modifiers = await loadIndexedDB("HungerGameModifierData", "modifiers", "modifiersData");
+
+        // 캐릭터 JSON 상태
+        const charStatus = document.getElementById("charStatus");
+        if (charDetails && Object.keys(charDetails).length > 0 && characters && Object.keys(characters).length > 0) {
+            charStatus.textContent = "캐릭터 JSON 업로드 완료";
+        } else {
+            charStatus.textContent = "캐릭터 JSON 업로드 필요";
+        }
+
+        // 이벤트 JSON 상태
+        const eventStatus = document.getElementById("eventStatus");
+        if (events && Object.keys(events).length > 0) {
+            eventStatus.textContent = "이벤트 JSON 업로드 완료";
+        } else {
+            eventStatus.textContent = "이벤트 JSON 업로드 필요";
+        }
+
+        // 보정치 JSON 상태
+        const modifierStatus = document.getElementById("modifierStatus");
+        if (modifiers && Object.keys(modifiers).length > 0) {
+            modifierStatus.textContent = "보정치 JSON 업로드 완료";
+        } else {
+            modifierStatus.textContent = "보정치 JSON 업로드 필요";
+        }
+    } catch (error) {
+        console.error("데이터 상태 확인 중 오류 발생:", error);
+    }
+}
+
+// "시작하기" 버튼 클릭 이벤트
 document.getElementById("startGame").addEventListener("click", async () => {
     try {
-        const characterData = uploadedFiles.characterJson;
-        const eventData = uploadedFiles.eventJson;
-        const modifierData = uploadedFiles.modifierJson;
+        const charDetails = await loadIndexedDB("HungerGameCharDetailsData", "charDetails");
+        const characters = await loadIndexedDB("HungerGameCharacterData", "characters", "charactersData");
+        const events = await loadIndexedDB("HungerGameEventData", "events", "eventsData");
+        const modifiers = await loadIndexedDB("HungerGameModifierData", "modifiers", "modifiersData");
 
         // JSON 데이터가 모두 로드되었는지 확인
-        if (!characterData) {
+        if (!charDetails || charDetails.length === 0 || !characters || characters.length === 0) {
             alert("캐릭터 JSON 파일이 업로드되지 않았습니다. 게임을 시작할 수 없습니다.");
             return;
         }
-        if (!eventData) {
+        if (!events || events.length === 0) {
             alert("이벤트 JSON 파일이 업로드되지 않았습니다. 게임을 시작할 수 없습니다.");
             return;
         }
-        if (!modifierData) {
+        if (!modifiers || Object.keys(modifiers).length === 0) {
             alert("보정치 JSON 파일이 업로드되지 않았습니다. 게임을 시작할 수 없습니다.");
             return;
         }
 
-        alert("모든 JSON 데이터를 성공적으로 저장했습니다. 게임을 시작합니다!");
+        alert("모든 JSON 데이터를 성공적으로 확인했습니다. 게임을 시작합니다!");
         window.location.href = "헝거게임게임화면.html";
     } catch (error) {
-        alert("데이터 처리 중 오류가 발생했습니다. 다시 시도해 주세요.");
-        console.error(error);
+        alert("데이터 로드 중 오류가 발생했습니다. 다시 시도해주세요.");
+        console.error("게임 시작 중 오류 발생:", error);
     }
+});
+
+// DOMContentLoaded 이벤트
+document.addEventListener("DOMContentLoaded", () => {
+    checkDataStatus(); // 데이터 상태 확인
 });
 
 
