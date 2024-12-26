@@ -46,7 +46,7 @@ header ul{
 
 header a{
     font-size: 35px;
-    width: 250px;
+    width: 300px;
     height: 100%;
     text-align: center;
     color: black;
@@ -200,6 +200,12 @@ header li>a:hover{
     color: rgb(255, 255, 255);
 }
 
+.mainText{
+    width: 1600px;
+    margin: auto;
+    font-size: 50px;
+    font-family: NanumSquareAcb;
+}
 
 
 /* 

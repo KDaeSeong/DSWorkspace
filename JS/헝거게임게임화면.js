@@ -129,12 +129,7 @@ let gameState = {
     finished: false,
     winnerPending: false,
 };
-
-
 // 진행 버튼 핸들러
-
-
-
 
 // 특정 캐릭터가 죽었을 때 상태 업데이트
 
@@ -169,7 +164,7 @@ function renderEvent({ text, images }) {
         .filter(({ image, name }) => image && name)
         .map(({ image, name, isAlive }) => `
             <div class="event-char-frame" style="display: inline-block; margin: 0 10px;">
-                <img src="${image}" alt="${name}" class="event-char-image" style="width: 220px; height: 220px; border: 1px solid black; background-color: black; border-radius: 50%; ${isAlive ? '' : 'filter: grayscale(100%);'}">
+                <img src="${image}" alt="${name}" class="event-char-image" style="width: 300px; height: 300px; object-fit: cover; border: 3px solid gold; background-color: black; ${isAlive ? '' : 'filter: grayscale(100%);'}">
                 <div class="event-char-name" style="margin-top: 40px;">${name}</div>
             </div>
         `).join("");
@@ -283,7 +278,6 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
 }
 
 
-
 function updateGamePhase() {
     const display = document.getElementById("day-night-display");
     const eventDisplay = document.querySelector(".event-display");
@@ -300,15 +294,30 @@ function updateGamePhase() {
             if (winner) {
                 display.innerHTML = `
                     <h1>승자: ${winner.name}</h1>
-                    <img src="${winner.image}" alt="${winner.name}" style="width: 220px; height: 220px; border: 2px solid black; border-radius: 50%; margin-top: 70px; margin-left: 30px">
+                   
                 `;
+
+                // 플레이어 이미지 영역을 최종 승자로 대체
+                const playerDisplay = document.getElementById("player-display");
+                const playerCard = document.getElementsByClassName("player-card");
+                if (playerDisplay) {
+                    playerDisplay.innerHTML = `
+                        <div class="player-card">
+                            <img src="${winner.image}" alt="${winner.name}" class="player-image" style="width: 600px; height: 600px; object-fit: cover; border: 10px solid gold; border-radius: 50%; margin: 20px auto; display: block;">
+                        </div>
+                    `;
+                    playerCard[0].style.width = "660px"
+                    playerCard[0].style.height = "660px"
+                }
             } else {
                 display.innerHTML = `<h1>모두 탈락했습니다.</h1>`;
             }
 
             gameState.winnerPending = false; // 승자 대기 플래그 해제
             proceedButton.textContent = "킬 순위 보기";
-            proceedButton.style.fontSize = "30px";
+            proceedButton.style.fontSize = "40px";
+            proceedButton.style.color = "white";
+            proceedButton.style.fontFamily = "NanumSquareAcb";
 
             return;
         }
@@ -332,7 +341,7 @@ function updateGamePhase() {
                 rankElement.style.textAlign = "center";
                 rankElement.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center;">
-                        <img src="${player.image}" alt="${player.name}" style="width: ${index === 0 ? '150px' : '100px'}; height: ${index === 0 ? '150px' : '100px'}; border-radius: 50%; margin-right: 20px; border: 3px solid ${index === 0 ? 'gold' : '#ddd'};">
+                        <img src="${player.image}" alt="${player.name}" style="width: ${index === 0 ? '150px' : '100px'}; height: ${index === 0 ? '150px' : '100px'}; margin-right: 20px; object-fit: cover; border: 3px solid ${index === 0 ? 'gold' : '#ddd'};">
                         <div>
                             <h3 style="margin: 0; font-size: ${index === 0 ? '24px' : '18px'};">${index + 1}위: ${player.name} (${player.kills} 킬)</h3>
                         </div>
@@ -343,7 +352,10 @@ function updateGamePhase() {
 
             gameState.rankDisplayed = true;
             proceedButton.textContent = "킬 로그 보기";
-
+            proceedButton.style.fontSize = "40px";
+            proceedButton.style.color = "white";
+            proceedButton.style.fontFamily = "NanumSquareAcb";
+            proceedButton.style.padding = "30px";
             return;
         }
 
@@ -367,6 +379,11 @@ function updateGamePhase() {
 
             gameState.logsDisplayed = true;
             proceedButton.textContent = "헝거게임 메인 화면으로";
+            proceedButton.style.padding = "10px";
+            proceedButton.style.fontSize = "40px";
+            proceedButton.style.color = "white";
+            proceedButton.style.fontFamily = "NanumSquareAcb";
+            proceedButton.style.fontWeight = "bold";
 
             return;
         }
@@ -383,17 +400,21 @@ function updateGamePhase() {
     // 게임 진행 중일 경우
     display.innerHTML = "";
     eventDisplay.innerHTML = "";
-
+    console.log(gameState.phase);
     if (gameState.phase === "day") {
-        display.classList.remove("night-mode");
         display.innerHTML = `<h1>${gameState.dayCount}일차 낮</h1>`;
-        processPhase("낮");
         gameState.phase = "night";
-    } else {
-        display.classList.add("night-mode");
-        display.innerHTML = `<h1>${gameState.dayCount}일차 밤</h1>`;
+        console.log("낮 모드 적용");
+        display.classList.remove("night-mode");
+        display.classList.add("day-mode");
         processPhase("밤");
+    } else {
+        display.innerHTML = `<h1>${gameState.dayCount}일차 밤</h1>`;
         gameState.phase = "day";
+        display.classList.add("night-mode");
+        display.classList.remove("day-mode");
+        console.log("밤 모드 적용");
+        processPhase("낮");
         gameState.dayCount++;
     }
 
@@ -425,6 +446,7 @@ function checkGameEnd() {
         gameState.logsDisplayed = false;
     }
 }
+
 
 function processPhase(phase) {
     if (!gameState.eventData) {
@@ -554,7 +576,7 @@ function renderCharacterImages(players) {
         playerElement.id = `player-${player.id}`;
 
         playerElement.innerHTML = `
-            <img src="${playerImage}" alt="${player.name}" class="player-image" style="width: 220px; height: 220px;">
+            <img src="${playerImage}" alt="${player.name}" class="player-image" style="width: 220px; height: 220px; object-fit: cover; ">
             <div class="player-name">${player.name}</div>
         `;
 

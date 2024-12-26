@@ -46,7 +46,7 @@ header ul{
 
 header a{
     font-size: 35px;
-    width: 250px;
+    width: 300px;
     height: 100%;
     text-align: center;
     color: black;
@@ -218,4 +218,11 @@ table img {
 #name{
     font-size: 30px;
     font-family: 'NanumSquareAcb';
+}
+
+.mainText{
+    width: 1600px;
+    margin: auto;
+    font-size: 50px;
+    font-family: NanumSquareAcb;
 }

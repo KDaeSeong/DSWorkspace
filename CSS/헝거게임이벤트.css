@@ -46,7 +46,7 @@ header ul{
 
 header a{
     font-size: 35px;
-    width: 250px;
+    width: 300px;
     height: 100%;
     text-align: center;
     color: black;
@@ -283,4 +283,11 @@ input[type="checkbox"] {
 
 #addEvent, #deleteEvent{
     margin: 0 50px;
+}
+
+.mainText{
+    width: 1600px;
+    margin: auto;
+    font-size: 50px;
+    font-family: NanumSquareAcb;
 }
