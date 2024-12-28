@@ -5,19 +5,19 @@ const openSignIn = document.getElementById("openSignIn");
 // 새 탭으로 열기
 openLogin.addEventListener("click", function () {
     if (openLogin.innerText.trim() === "로그인") {
-        window.open("헝거게임로그인.html", "_blank", "width=400, height=400, left=100, top=150");
+        window.open("ERLogin.html", "_blank", "width=400, height=400, left=100, top=150");
     } else if (openLogin.innerText.trim() === "내 정보") {
-        window.open("헝거게임내정보.html", "_self");
+        window.open("ERMyProfile.html", "_self");
     }
 });
 
 openSignIn.addEventListener("click", function () {
     if (openSignIn.innerText.trim() === "회원가입") {
-        window.open("헝거게임회원가입.html", "_blank", "width=1000, height=700, left=100, top=150");
+        window.open("ERSignIn.html", "_blank", "width=1000, height=700, left=100, top=150");
     } else {
         localStorage.setItem("loginCheck", "false"); // 로그아웃 처리
         localStorage.setItem("loginID", "");
-        window.open("헝거게임메인.html", "_self");
+        window.open("ERMain.html", "_self");
         updateLoginState();
     }
 });

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>헝거게임 메인</title>
+    <title>ERMain</title>
     <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/헝거게임메인.css">
+    <link rel="stylesheet" href="../CSS/ERMain.css">
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const loginCheck = localStorage.getItem('loginCheck') === "true";
@@ -37,13 +37,13 @@
             <section id="header-id1">
                 <ul>
                     <li><a href="#">
-                        <img src="../이미지/헝거게임.webp" alt="" width="40%">
+                        <img src="../Images/ERLogo.webp" alt="" width="40%">
                     </a></li>
-                    <li><a href="헝거게임메인.html" id="ERMain">메인</a></li>
-                    <li><a href="헝거게임캐릭터.html" id="settingChar">캐릭터 설정</a></li>
-                    <li><a href="헝거게임캐릭터상세.html" id="settingCharDetail">캐릭터 상세설정</a></li>
-                    <li><a href="헝거게임이벤트.html" id="settingEvent">이벤트 설정</a></li>
-                    <li><a href="헝거게임보정치.html" id="settingModifier">보정치 설정</a></li>
+                    <li><a href="ERMain.html" id="ERMain">메인</a></li>
+                    <li><a href="ERCharacters.html" id="settingChar">캐릭터 설정</a></li>
+                    <li><a href="ERCharDetails.html" id="settingCharDetail">캐릭터 상세설정</a></li>
+                    <li><a href="EREvents.html" id="settingEvent">이벤트 설정</a></li>
+                    <li><a href="ERModifiers.html" id="settingModifier">보정치 설정</a></li>
                     <li>
                         <a id="triggerFileUpload">회원정보<br>불러오기</a>
                         <input type="file" id="openFile" accept=".json" style="display: none;">
@@ -58,7 +58,7 @@
         </header>
         <div class="mainH1">
             <div class="police-container">
-                <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+                <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
                 <h1 class="title-text">헝거게임 시뮬레이터</h1>
             </div>
             <div class="mainText">
@@ -75,7 +75,7 @@
         
         <div class="mainH1">
             <div class="police-container">
-                <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+                <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
                 <h1 class="title-text">소스코드, 오류 제보, 기여, 기타 등등</h1>
             </div>
             <div class="mainText">
@@ -105,6 +105,6 @@
             </a>
         </div>
     </main>
-    <script src="../JS/헝거게임메인.js"></script>
+    <script src="../JS/ERMain.js"></script>
 </body>
 </html>

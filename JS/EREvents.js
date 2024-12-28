@@ -5,19 +5,19 @@ const openSignIn = document.getElementById("openSignIn");
 // 새 탭으로 열기
 openLogin.addEventListener("click", function () {
     if (openLogin.innerText.trim() === "로그인") {
-        window.open("헝거게임로그인.html", "_blank", "width=400, height=400, left=100, top=150");
+        window.open("ERLogin.html", "_blank", "width=400, height=400, left=100, top=150");
     } else if (openLogin.innerText.trim() === "내 정보") {
-        window.open("헝거게임내정보.html", "_self");
+        window.open("ERMyProfile.html", "_self");
     }
 });
 
 openSignIn.addEventListener("click", function () {
     if (openSignIn.innerText.trim() === "회원가입") {
-        window.open("헝거게임회원가입.html", "_blank", "width=1000, height=700, left=100, top=150");
+        window.open("ERSignIn.html", "_blank", "width=1000, height=700, left=100, top=150");
     } else {
         localStorage.setItem("loginCheck", "false"); // 로그아웃 처리
         localStorage.setItem("loginID", "");
-        window.open("헝거게임메인.html", "_self");
+        window.open("ERMain.html", "_self");
         updateLoginState();
     }
 });
@@ -127,19 +127,19 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     eventForm.addEventListener("submit", (event) => {
         event.preventDefault();
-
+    
         const textEvent = document.querySelector("#popupForm textarea[name='eventName']").value;
-        const killer = document.getElementById("popupKiller").value;
-        const killee = document.getElementById("popupKillee").value;
+        const killer = document.getElementById("popupKiller").value.split(",").map(item => item.trim());
+        const killee = document.getElementById("popupKillee").value.split(",").map(item => item.trim());
         const heal = document.getElementById("popupHeal").checked;
         const healTarget = document.getElementById("popupHealTarget").value;
         const dayNight = document.getElementById("popupDayNight").value;
-
+    
         const newRow = document.createElement("tr");
         newRow.innerHTML = `
             <td><textarea class="long-input" rows="5" cols="70" style="resize: none;" readonly>${textEvent}</textarea></td>
-            <td><input type="text" class="short-input" value="${killer || "X"}" readonly></td>
-            <td><input type="text" class="short-input" value="${killee || "X"}" readonly></td>
+            <td><input type="text" class="short-input" value="${killer.join(", ") || "X"}" readonly></td>
+            <td><input type="text" class="short-input" value="${killee.join(", ") || "X"}" readonly></td>
             <td><input type="checkbox" ${heal ? "checked" : ""} disabled></td>
             <td><input type="text" class="short-input" value="${healTarget || "X"}" readonly></td>
             <td>
@@ -152,10 +152,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             <td><input type="checkbox" class="delete-checkbox"></td>
         `;
         tableBody.appendChild(newRow);
-
+    
         popupForm.style.display = "none";
         eventForm.reset();
     });
+    
 
     document.getElementById("deleteEvent").addEventListener("click", () => {
         const rows = tableBody.querySelectorAll("tr");
@@ -178,28 +179,25 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const inputs = row.querySelectorAll("input.short-input");
                 const healCheckbox = row.querySelector("input[type='checkbox']");
                 const dayNightSelect = row.querySelector("select.short-select");
-
-                const killer = inputs[0]?.value || "";
-                const killee = inputs[1]?.value || "";
+    
+                const killer = inputs[0]?.value.split(",").map(item => item.trim()) || [];
+                const killee = inputs[1]?.value.split(",").map(item => item.trim()) || [];
                 const heal = healCheckbox?.checked || false;
                 const healTarget = inputs[2]?.value || "";
                 const dayNight = dayNightSelect?.value || "";
-
+    
                 eventData.push({ textEvent, killer, killee, heal, healTarget, dayNight });
             });
-
+    
             if (eventData.length === 0) {
                 alert("저장할 이벤트가 없습니다.");
                 return;
             }
-
-            const blob = new Blob([JSON.stringify(eventData, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = "eventData.json";
-            a.click();
-            URL.revokeObjectURL(a.href);
-
+    
+            // JSON 파일로 저장
+            saveToJSONFile(eventData, "eventData.json");
+    
+            // IndexedDB에 저장
             await saveToIndexedDB("events", "eventsData", eventData);
             alert("이벤트가 저장되었습니다!");
         } catch (error) {
@@ -208,34 +206,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
     
+    
     loadButton.addEventListener("click", () => {
         const input = document.createElement("input");
         input.type = "file";
         input.accept = ".json";
-
+    
         input.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (!file) {
                 alert("파일을 선택하지 않았습니다.");
                 return;
             }
-
+    
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
                     const savedData = JSON.parse(e.target.result);
-
+    
                     // IndexedDB에 저장
                     await saveToIndexedDB("events", "eventsData", savedData);
-
+    
                     // 테이블 초기화 후 데이터 로드
                     tableBody.innerHTML = "";
                     savedData.forEach((event) => {
                         const newRow = document.createElement("tr");
                         newRow.innerHTML = `
                             <td><textarea class="long-input" rows="5" cols="70" style="resize: none;" readonly>${event.textEvent}</textarea></td>
-                            <td><input type="text" class="short-input" value="${event.killer}" readonly></td>
-                            <td><input type="text" class="short-input" value="${event.killee}" readonly></td>
+                            <td><input type="text" class="short-input" value="${event.killer.join(", ")}" readonly></td>
+                            <td><input type="text" class="short-input" value="${event.killee.join(", ")}" readonly></td>
                             <td><input type="checkbox" ${event.heal ? "checked" : ""} disabled></td>
                             <td><input type="text" class="short-input" value="${event.healTarget}" readonly></td>
                             <td>
@@ -248,7 +247,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <td><input type="checkbox" class="delete-checkbox"></td>`;
                         tableBody.appendChild(newRow);
                     });
-
+    
                     alert("이벤트를 불러오고 IndexedDB에 반영했습니다!");
                 } catch (error) {
                     alert("파일 형식이 잘못되었습니다.");
@@ -257,12 +256,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
             reader.readAsText(file);
         });
-
+    
         input.click();
     });
+    
 });
 
-
+function saveToJSONFile(data, fileName) {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 // 페이지 로드 시 IndexedDB에서 이벤트 데이터 불러오기
 document.addEventListener("DOMContentLoaded", async () => {

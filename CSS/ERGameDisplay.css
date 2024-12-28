@@ -46,7 +46,7 @@ header h1, .event-text {
     font-weight: bold;
     font-size: 65px;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     border: 1px solid white;
     border-radius: 10px;
 }
@@ -54,11 +54,13 @@ header h1, .event-text {
 .night-mode {
     background: linear-gradient(to bottom right, black, navy);
     transition: opacity 0.5s ease;
+    height: 300px;
 }
 
 .day-mode {
     background: linear-gradient(to bottom right, orange, yellow);
     transition: opacity 0.5s ease;
+    height: 300px;
 }
 
 .day-gradient, .night-gradient {

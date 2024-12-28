@@ -6,19 +6,19 @@ const printFile = document.getElementById("printFile");
 // 조건에 따라 창 다르게 열기
 openLogin.addEventListener("click", function () {
     if (openLogin.innerText.trim() === "로그인") {
-        window.open("헝거게임로그인.html", "_blank", "width=500, height=500, left=100, top=150");
+        window.open("ERLogin.html", "_blank", "width=500, height=500, left=100, top=150");
     } else if (openLogin.innerText.trim() === "내 정보") {
-        window.open("헝거게임내정보.html", "_self");
+        window.open("ERMyProfile.html", "_self");
     }
 });
 
 openSignIn.addEventListener("click", function () {
     if (openSignIn.innerText.trim() === "회원가입") {
-        window.open("헝거게임회원가입.html", "_blank", "width=1000, height=870, left=100, top=120");
+        window.open("ERSignIn.html", "_blank", "width=1000, height=870, left=100, top=120");
     } else {
         localStorage.setItem("loginCheck", "false"); // 로그아웃 처리
         localStorage.setItem("loginID", "");
-        window.open("헝거게임메인.html", "_self");
+        window.open("ERMain.html", "_self");
         updateLoginState();
     }
 });
@@ -400,7 +400,7 @@ document.getElementById("startGame").addEventListener("click", async () => {
         }
 
         alert("모든 JSON 데이터를 성공적으로 확인했습니다. 게임을 시작합니다!");
-        window.location.href = "헝거게임게임화면.html";
+        window.location.href = "ERGameDisplay.html";
     } catch (error) {
         alert("데이터 로드 중 오류가 발생했습니다. 다시 시도해주세요.");
         console.error("게임 시작 중 오류 발생:", error);

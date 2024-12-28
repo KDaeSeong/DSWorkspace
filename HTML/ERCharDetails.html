@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>헝거게임이벤트</title>
+    <title>EREvents</title>
     <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
-    <link rel="stylesheet" href="../CSS/헝거게임캐릭터상세.css">
+    <link rel="stylesheet" href="../CSS/ERCharDetails.css">
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const loginCheck = localStorage.getItem('loginCheck') === "true";
@@ -27,13 +27,13 @@
             <section id="header-id1">
                 <ul>
                     <li><a href="#">
-                        <img src="../이미지/헝거게임.webp" alt="" width="40%">
+                        <img src="../Images/ERLogo.webp" alt="" width="40%">
                     </a></li>
-                    <li><a href="헝거게임메인.html">메인</a></li>
-                    <li><a href="헝거게임캐릭터.html">캐릭터 설정</a></li>
-                    <li><a href="헝거게임캐릭터상세.html" id="EREvent">캐릭터 상세설정</a></li>
-                    <li><a href="헝거게임이벤트.html">이벤트 설정</a></li>
-                    <li><a href="헝거게임보정치.html">보정치 설정</a></li>
+                    <li><a href="ERMain.html">메인</a></li>
+                    <li><a href="ERCharacters.html">캐릭터 설정</a></li>
+                    <li><a href="ERCharDetails.html" id="EREvent">캐릭터 상세설정</a></li>
+                    <li><a href="EREvents.html">이벤트 설정</a></li>
+                    <li><a href="ERModifiers.html">보정치 설정</a></li>
                 </ul>
                 <ul>
                 </ul>
@@ -44,22 +44,15 @@
             </section>
         </header>
         <div class="police-container">
-            <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
+            <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
             <h1 class="title-text">캐릭터 상세 설정</h1>
         </div>
-        <div>
+        <div class="mainText">
             <div class="mainText">
                     이곳에서는 캐릭터의 상세 능력치를 설정할 수 있습니다.
             </div>
         </div>
         
-        <div>
-            <div class="police-container">
-                <!-- <img src="../이미지/폴리스라인.png" alt="폴리스라인" class="police-line">
-                <h1 class="title-text">캐릭터 상세 설정</h1> -->
-            </div>
-
-        </div>
         <div id="adEventDiv">
             <table id="characterTable" border="1">
                 <thead>
@@ -99,6 +92,6 @@
         </div>
     </main>
 
-    <script src="../JS/헝거게임캐릭터상세.js"></script>
+    <script src="../JS/ERCharDetails.js"></script>
 </body>
 </html>
