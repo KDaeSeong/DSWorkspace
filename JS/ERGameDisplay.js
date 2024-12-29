@@ -310,6 +310,8 @@ function processPhase(phase) {
 
     if (alivePlayers.length <= 1) {
         console.warn("남은 플레이어가 1명 이하이므로 이벤트를 건너뜁니다.");
+        gameState.finished = true;
+        gameState.winnerPending = true;
         return;
     }
 
@@ -443,10 +445,6 @@ proceedButton.addEventListener("click", () => {
 
 
 
-
-
-
-
 function updateGamePhase() {
     const display = document.getElementById("day-night-display");
     const eventDisplay = document.querySelector(".event-display");
@@ -456,7 +454,8 @@ function updateGamePhase() {
             // 최종 승자 표시 단계
             display.innerHTML = "";
             eventDisplay.innerHTML = "";
-
+            display.classList.remove("night-mode")
+            display.classList.add("day-mode")
             const alivePlayers = gameState.players.filter((player) => player.isAlive);
             const winner = alivePlayers[0];
 
@@ -484,7 +483,9 @@ function updateGamePhase() {
 
             gameState.winnerPending = false; // 승자 대기 플래그 해제
             proceedButton.textContent = "킬 순위 보기";
-            proceedButton.style.fontSize = "2em";
+            proceedButton.style.fontSize = "60px";
+            proceedButton.style.width = "400px";
+            proceedButton.style.height = "150px";
             proceedButton.style.color = "white";
             proceedButton.style.fontFamily = "NanumSquareAcb";
             proceedButton.style.fontWeight = "bold";
@@ -593,10 +594,11 @@ function updateGamePhase() {
             // 진행 버튼 스타일 수정
             gameState.rankDisplayed = true;
             proceedButton.textContent = "킬 로그 보기";
-            proceedButton.style.fontSize = "50px";
+            proceedButton.style.fontSize = "60px";
+            proceedButton.style.width = "400px";
+            proceedButton.style.height = "150px";
             proceedButton.style.color = "white";
             proceedButton.style.fontFamily = "NanumSquareAcb";
-            proceedButton.style.padding = "30px";
             proceedButton.style.fontWeight = "bold";
             return;
         }
@@ -627,9 +629,9 @@ function updateGamePhase() {
 
             gameState.logsDisplayed = true;
             proceedButton.textContent = "헝거게임 메인 화면으로";
-            proceedButton.style.padding = "10px";
-            proceedButton.style.fontSize = "40px";
+            proceedButton.style.fontSize = "60px";
             proceedButton.style.width = "400px"
+            proceedButton.style.height = "150px";
             proceedButton.style.color = "white";
             proceedButton.style.fontFamily = "NanumSquareAcb";
             proceedButton.style.fontWeight = "bold";
