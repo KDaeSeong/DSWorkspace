@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const detail = charDetails.find(detail => detail.id === char.id) || {};
             return {
                 ...char,
-                id: `a${index}`, // 이벤트에서 사용하는 ID 형식으로 변경
+                id: `${index}`, // 이벤트에서 사용하는 ID 형식으로 변경
                 name: char.name || `플레이어${index + 1}`,
                 isAlive: true,
                 kills: 0,
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 이벤트 데이터 초기화
     console.log("초기 이벤트 데이터:", eventData);
     // 이벤트 데이터 초기화 시 killer, killee를 gameState.players에 매핑
-    gameState.eventData = (eventData.data || []).map(event => {
+    gameState.eventData = (eventData.data || []).map((event, index) => {
         const killers = event.killer.map(id => ({
             id,
             player: gameState.players.find(player => player.id === id)
@@ -96,15 +96,34 @@ document.addEventListener("DOMContentLoaded", async () => {
             id,
             player: gameState.players.find(player => player.id === id)
         }));
+    
+        console.log(`Event ${index + 1} Initial Data:`);
+        console.log("Killers:", killers);
+        console.log("Killees:", killees);
+    
         return {
             ...event,
-            killer: killers,  // 매핑된 killer 데이터
-            killee: killees,  // 매핑된 killee 데이터
+            killer: killers,
+            killee: killees,
         };
     });
+    
 
     
-    
+    console.log("GameState Players:", gameState.players);
+
+    gameState.players.forEach((player, index) => {
+        console.log(`Player ${index}: ID=${player.id}, Name=${player.name}, IsAlive=${player.isAlive}`);
+    });
+
+    console.log("Event Data:", gameState.eventData);
+
+    gameState.eventData.forEach((event, index) => {
+        console.log(`Event ${index + 1}: ${event.textEvent}`);
+        console.log("Killers:", event.killer);
+        console.log("Killees:", event.killee);
+    });
+
 
         
     // 보정치 객체 생성
@@ -131,6 +150,7 @@ let gameState = {
     eventResults: [],
     finished: false,
     winnerPending: false,
+    killerLogs: [], // 추가
 };
 
 // 특정 캐릭터가 죽었을 때 상태 업데이트
@@ -155,62 +175,6 @@ function updateCharacterStatus(player) {
     }
 }
 
-function getPlayerNameById(playerId, players) {
-    // ID를 고유한 player 형태로 변환
-    const normalizedId = playerId.replace(/^a/, "playerA").replace(/^b/, "playerB").replace(/^c/, "playerC");
-    console.log(`Mapping playerId: ${playerId} to normalizedId: ${normalizedId}`);
-
-    const player = players.find(p => p.id === normalizedId);
-    if (!player) {
-        console.warn(`No player found for ID: ${normalizedId}`);
-    }
-    return player ? player.name : playerId; // 이름이 없으면 원래 ID 반환
-}
-
-
-
-// 이벤트 렌더링
-function renderEvent({ text, killer, killee, healTarget, images }) {
-    const eventDisplay = document.querySelector(".event-display");
-    const eventElement = document.createElement("div");
-    eventElement.className = "event-appear";
-
-    // 텍스트에서 ID를 이름으로 변환
-    text = text.replace(/\ba(\d+)\b/g, (_, id) => getPlayerNameById(`a${id}`, gameState.players));
-    text = text.replace(/\bb(\d+)\b/g, (_, id) => getPlayerNameById(`b${id}`, gameState.players));
-    text = text.replace(/\bc(\d+)\b/g, (_, id) => getPlayerNameById(`c${id}`, gameState.players));
-
-    console.log("Converted text:", text);
-
-    // 이미지 처리
-    const imagesHtml = images
-        .filter(({ image, name }) => image && name)
-        .map(({ image, name, isAlive }, index) => `
-            <div id="event-char-${index}" class="event-char-frame" style="display: inline-block; margin: 0 10px;">
-                <img 
-                    src="${image}" 
-                    alt="${name}" 
-                    class="event-char-image" 
-                    style="
-                        width: 300px; 
-                        height: 300px; 
-                        object-fit: cover; 
-                        border: 3px solid gold; 
-                        background-color: black; 
-                        ${isAlive === false ? "filter: grayscale(100%);" : ""}
-                    "
-                >
-                <div class="event-char-name" style="margin-top: 40px;">${name}</div>
-            </div>
-        `).join("");
-
-    eventElement.innerHTML = `
-        <div class="event-char">${imagesHtml}</div>
-        <div class="event-text">${text}</div>
-    `;
-
-    eventDisplay.appendChild(eventElement);
-}
 
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -274,16 +238,15 @@ function getRandomSubsetForAllPlayers(players, events, usedPlayers) {
 // 이벤트 처리
 // 데이터를 기반으로 killer와 killee를 선정하고 이벤트를 처리하는 로직
 function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = null) {
-    let validPlayers = players.filter(
+    const validPlayers = players.filter(
         (player) =>
             player.isAlive &&
             !usedPlayers.has(player.id) &&
-            player.id !== excludeId
+            player.id !== excludeId // 동일 ID 제외
     );
 
-
     if (validPlayers.length === 0) {
-        console.error("여전히 유효한 플레이어를 찾을 수 없습니다.");
+        console.error("No valid players available. excludeId:", excludeId);
         return null;
     }
 
@@ -291,11 +254,11 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
         const stats = player.stats || {};
         switch (eventType) {
             case "근접전":
-                return (stats.strength === "상" ? 3 : stats.strength === "중" ? 2 : 1);
+                return stats.strength === "상" ? 3 : stats.strength === "중" ? 2 : 1;
             case "원거리전":
-                return (stats.shooting === "상" ? 3 : stats.shooting === "중" ? 2 : 1);
+                return stats.shooting === "상" ? 3 : stats.shooting === "중" ? 2 : 1;
             case "계략":
-                return (stats.intelligence === "상" ? 3 : stats.intelligence === "중" ? 2 : 1);
+                return stats.intelligence === "상" ? 3 : stats.intelligence === "중" ? 2 : 1;
             default:
                 return 1;
         }
@@ -303,7 +266,7 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
 
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     if (totalWeight === 0) {
-        console.error("모든 플레이어의 가중치가 0입니다.");
+        console.error("All players have zero weight.");
         return null;
     }
 
@@ -316,19 +279,18 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
         }
     }
 
-    console.error("플레이어 선택 실패");
+    console.error("Failed to select a player.");
     return null;
 }
 
 
-
 // 이벤트 처리 로직 개선
-
 function processPhase(phase) {
-    if (!gameState.eventData) {
-        console.error("eventData가 로드되지 않았습니다.");
-        return;
+    if (!gameState.killerLogs) {
+        gameState.killerLogs = [];
     }
+
+    console.log("Processing phase:", phase);
 
     const eligibleEvents = gameState.eventData.filter(
         (event) => event.dayNight === phase || event.dayNight === "전체"
@@ -337,85 +299,81 @@ function processPhase(phase) {
     const alivePlayers = gameState.players.filter((player) => player.isAlive);
 
     if (alivePlayers.length <= 1) {
-        console.warn("남은 플레이어가 1명 이하이므로 이벤트를 건너뜁니다.");
+        console.warn("Less than 2 players alive. Skipping phase.");
         gameState.finished = true;
         gameState.winnerPending = true;
         return;
     }
 
-    // 중복 참여를 방지하기 위한 Set 초기화
     let usedPlayers = new Set();
-
-    const eventCount = Math.min(alivePlayers.length, 5); // 낮/밤 동안 발생할 최대 이벤트 수
+    const eventCount = Math.min(alivePlayers.length, 5);
 
     for (let i = 0; i < eventCount; i++) {
         const event = eligibleEvents[Math.floor(Math.random() * eligibleEvents.length)];
         const eventType = determineEventType(event.textEvent);
-        const eventImages = [];
-        let eventText = event.textEvent;
 
-        if (event.killer === "X" && event.healTarget !== "X") {
-            // 생존 이벤트 처리
-            const survivor = getRandomWeightedPlayer(gameState.players, usedPlayers, eventType);
-            if (!survivor) {
-                console.warn("생존 이벤트에서 유효한 대상을 찾을 수 없습니다.", event);
-                continue;
-            }
+        let killers = [];
+        let killees = [];
 
-            survivor.hasBenefit = true; // 생존 보너스 부여
-            eventImages.push({
-                image: survivor.image,
-                name: survivor.name,
-                isAlive: survivor.isAlive,
+        // Killers 및 Killees 처리
+        if (event.textEvent.includes("a0") || event.textEvent.includes("b0")) {
+            killers = event.killer.map((_, idx) => getRandomWeightedPlayer(gameState.players, usedPlayers, eventType));
+            killees = event.killee.map((_, idx) => {
+                let killee;
+                let retries = 0;
+
+                do {
+                    killee = getRandomWeightedPlayer(gameState.players, usedPlayers, eventType, killers[idx]?.id);
+                    retries++;
+                } while (retries < 3 && (!killee || killers[idx]?.id === killee.id));
+
+                return killee;
             });
 
-            eventText = `${survivor.name} ${event.textEvent.replace(/%0/g, "")}`;
-        } else {
-            // 일반 이벤트 처리
-            const killer = getRandomWeightedPlayer(gameState.players, usedPlayers, eventType);
-            if (!killer) {
-                console.warn("killer를 찾을 수 없어 이벤트를 건너뜁니다.", event);
+            // 검증
+            if (killers.some(k => !k) || killees.some(k => !k) || killers.some((k, idx) => k?.id === killees[idx]?.id)) {
+                console.warn("Invalid Killer or Killee detected. Skipping event.");
                 continue;
             }
-
-            const killee = getRandomWeightedPlayer(
-                gameState.players,
-                usedPlayers,
-                eventType,
-                killer.id
-            );
-            if (!killee) {
-                console.warn("killee를 찾을 수 없어 이벤트를 건너뜁니다.", event);
-                continue;
-            }
-
-            killee.isAlive = false;
-            killee.deathDay = gameState.dayCount;
-
-            killer.kills = (killer.kills || 0) + 1; // 킬 카운트 증가
-
-            eventImages.push(
-                { image: killer.image, name: killer.name, isAlive: killer.isAlive },
-                { image: killee.image, name: killee.name, isAlive: killee.isAlive }
-            );
-
-            eventText = event.textEvent
-                .replace(/^[a\d]$/g, killer.name)
-                .replace(/^[b\d]$/g, killee.name);
-
-            usedPlayers.add(killer.id); // killer 제한 추가
-            usedPlayers.add(killee.id); // killee 제한 추가
-
-            // 킬 로그 저장
-            gameState.killerLogs = gameState.killerLogs || [];
-            gameState.killerLogs.push(eventText);
         }
 
-        renderEvent({ text: eventText, images: eventImages });
-    }
+        // 텍스트 변환
+        let eventText = event.textEvent;
 
-    gameState.players.forEach((player) => updateCharacterStatus(player));
+        killers.forEach((killer, idx) => {
+            eventText = eventText.replace(new RegExp(`a${idx}`, "g"), `a${killer.id}`);
+        });
+
+        killees.forEach((killee, idx) => {
+            eventText = eventText.replace(new RegExp(`b${idx}`, "g"), `b${killee.id}`);
+        });
+
+        console.log("Selected Killers:", killers.map(k => k?.id || "N/A"));
+        console.log("Selected Killees:", killees.map(k => k?.id || "N/A"));
+        console.log(`Generated Event Text Before Render: ${eventText}`);
+
+        gameState.killerLogs.push(eventText);
+
+        // Render Event
+        renderEvent({
+            text: eventText,
+            images: [
+                ...killers.map(killer => ({
+                    image: killer.image,
+                    name: killer.name,
+                    isAlive: killer.isAlive,
+                })),
+                ...killees.map(killee => ({
+                    image: killee.image,
+                    name: killee.name,
+                    isAlive: killee.isAlive,
+                })),
+            ],
+        });
+    }
 }
+
+
 
 
 // 무작위 하위 집합 선택
@@ -469,8 +427,6 @@ const proceedButton = document.getElementById("proceed");
 proceedButton.addEventListener("click", () => {
     updateGamePhase();
 });
-
-
 
 
 function updateGamePhase() {
@@ -700,3 +656,61 @@ function updateGamePhase() {
     }
 
 }
+
+
+// console.log("Initialized Players:", gameState.players);
+// 이벤트 렌더링'
+
+function renderEvent({ text, images }) {
+    console.log("Event Text Before Conversion:", text);
+
+    // ID 매핑
+    const killerMatches = text.match(/a(\d+)/g) || [];
+    const killeeMatches = text.match(/b(\d+)/g) || [];
+
+    const killerIds = [...new Set(killerMatches.map(match => match.match(/a(\d+)/)[1]))];
+    const killeeIds = [...new Set(killeeMatches.map(match => match.match(/b(\d+)/)[1]))];
+
+    console.log("Extracted Killer IDs:", killerIds);
+    console.log("Extracted Killee IDs:", killeeIds);
+
+    // 텍스트 변환
+    const updatedText = text
+        .replace(/a(\d+)/g, (_, id) => {
+            const killer = gameState.players.find((p) => p.id === id && p.isAlive);
+            return killer ? killer.name : `a${id}`;
+        })
+        .replace(/b(\d+)/g, (_, id) => {
+            const killee = gameState.players.find((p) => p.id === id && p.isAlive);
+            return killee ? killee.name : `b${id}`;
+        });
+
+    console.log(`Converted Text: ${updatedText}`);
+
+    // 이미지 출력 유지
+    const imagesHtml = images
+        .map(({ image, name, isAlive }, index) => `
+            <div id="event-char-${index}" class="event-char-frame" style="display: inline-block; margin: 0 10px;">
+                <img 
+                    src="${image}" 
+                    alt="${name}" 
+                    class="event-char-image" 
+                    style="width: 300px; height: 300px; object-fit: cover; border: 3px solid gold; background-color: black; ${!isAlive ? "filter: grayscale(100%);" : ""}"
+                >
+                <div class="event-char-name" style="margin-top: 40px;">${name}</div>
+            </div>
+        `).join("");
+
+    const eventDisplay = document.querySelector(".event-display");
+    const eventElement = document.createElement("div");
+    eventElement.className = "event-appear";
+    eventElement.innerHTML = `
+        <div class="event-char">${imagesHtml}</div>
+        <div class="event-text">${updatedText}</div>
+    `;
+
+    eventDisplay.appendChild(eventElement);
+}
+
+
+
