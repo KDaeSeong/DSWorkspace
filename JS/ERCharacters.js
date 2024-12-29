@@ -86,33 +86,58 @@ async function saveToIndexedDB(storeName, id, data) {
 
 // 데이터 불러오기
 async function loadFromIndexedDB(storeName, id) {
-    const db = await initIndexedDB();
+    try {
+        const db = await initIndexedDB();
 
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction(storeName, "readonly");
-        const store = transaction.objectStore(storeName);
-        const request = store.get(id);
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, "readonly");
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
 
-        request.onsuccess = (event) => resolve(event.target.result?.data || null);
-        request.onerror = (event) => reject(event.target.error);
-    });
+            request.onsuccess = (event) => {
+                console.log("IndexedDB 데이터 불러오기 성공:", request.result);
+                resolve(request.result?.data || []);
+            };
+            request.onerror = (event) => {
+                console.error("IndexedDB 데이터 불러오기 오류:", request.error);
+                reject(request.error);
+            };
+        });
+    } catch (error) {
+        console.error("loadFromIndexedDB 함수 오류:", error);
+        throw error;
+    }
 }
+
 
 async function saveCharactersToIndexedDB() {
     const characters = [];
-    document.querySelectorAll(".characterRowContainer2").forEach((container) => {
+    document.querySelectorAll(".characterRowContainer2").forEach((container, index) => {
         const name = container.querySelector(".textChar").value;
         const gender = container.querySelector(".gender").value;
         const imageSrc = container.querySelector(".previewImage").src || "";
 
-        characters.push({ name, gender, imageSrc });
+        characters.push({ id: index, name, gender, imageSrc });
     });
 
     try {
+        // 1. 캐릭터 데이터를 저장
         await saveToIndexedDB("characters", "charactersData", characters);
         console.log("IndexedDB에 캐릭터 데이터 저장 완료!");
+
+        // 2. CharDetails에 기본 데이터 추가
+        const defaultDetails = characters.map(character => ({
+            id: character.id, // 동일한 ID로 매핑
+            physique: "중간", // 기본 체격
+            attributes: Array(7).fill("중"), // 7개의 능력치 기본값
+            hasResetButton: true // 초기화 버튼 포함 여부
+        }));
+
+        await saveToIndexedDB("charDetails", "charDetailsData", defaultDetails);
+        console.log("HungerGameCharDetailsData에 기본 데이터 추가 완료!");
+
     } catch (error) {
-        console.error("캐릭터 데이터를 IndexedDB에 저장하는 중 오류 발생:", error);
+        console.error("데이터 저장 중 오류 발생:", error);
     }
 }
 
@@ -140,34 +165,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 캐릭터 추가 버튼 클릭 이벤트
     addCharButton.addEventListener("click", () => {
-        addCharacter("", "M", "");
+        addCharacter("", "남", "");
         saveCharactersToIndexedDB(); // 캐릭터 추가 후 즉시 IndexedDB에 저장
     });
     
     // 캐릭터 추가 함수
-    function addCharacter(name = "", gender = "M", imageSrc = "") {
-        const contentDiv = document.createElement("div");
-        contentDiv.classList.add("characterRowContainer2");
     
-        contentDiv.innerHTML = `
-            <div class="characterRow">
-                <button type="button" class="deleteChar">캐릭터 삭제</button>
-                <button type="button" class="addImage">이미지 추가</button>
-                <button type="button" class="deleteImage">이미지 삭제</button>
-                <label>이름: <input type="text" class="textChar" value="${name}"></label>
-                <label>성별:
-                    <select name="genderCheck" class="gender">
-                        <option value="M" ${gender === "M" ? "selected" : ""}>남</option>
-                        <option value="F" ${gender === "F" ? "selected" : ""}>여</option>
-                        <option value="N" ${gender === "N" ? "selected" : ""}>무성</option>
-                    </select>
-                </label>
-            </div>
-            <img class="previewImage" src="${imageSrc}" alt="이미지 미리보기" style="display:${imageSrc ? "block" : "none"};">
-        `;
-    
-        addCharContainer.appendChild(contentDiv);
-    }
+
+        
 
     // 이벤트 위임으로 이미지 추가 및 삭제, 캐릭터 삭제 관리
     addCharContainer.addEventListener("click", async (event) => {
@@ -224,62 +229,139 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileInput = document.createElement("input");
         fileInput.type = "file";
         fileInput.accept = ".json";
-
+    
         fileInput.addEventListener("change", async (event) => {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = async (e) => {
-                    const characters = JSON.parse(e.target.result);
-
-                    addCharContainer.innerHTML = "";
-
-                    characters.forEach((char) => {
-                        addCharacter(char.name, char.gender, char.imageSrc);
-                    });
-
-                    await saveToIndexedDB("characters", "charactersData", characters);
-                    alert("캐릭터를 불러오고 IndexedDB에 저장했습니다!");
+                    try {
+                        const characters = JSON.parse(e.target.result);
+    
+                        if (Array.isArray(characters)) {
+                            // IndexedDB에 데이터 저장
+                            await saveToIndexedDB("characters", "charactersData", characters);
+    
+                            // UI 업데이트
+                            const addCharContainer = document.getElementById("characterRowContainer");
+                            addCharContainer.innerHTML = "";
+    
+                            characters.forEach(({ id, name, gender, imageSrc }) => {
+                                addCharacter(name, gender, imageSrc);
+                            });
+    
+                            alert("JSON 데이터를 불러오고 IndexedDB에 저장했습니다!");
+                        } else {
+                            alert("잘못된 JSON 데이터 형식입니다.");
+                        }
+                    } catch (error) {
+                        console.error("JSON 파일 불러오기 중 오류 발생:", error);
+                    }
                 };
                 reader.readAsText(file);
             }
         });
-
+    
         fileInput.click();
     });
+    
 
     // IndexedDB에서 캐릭터 데이터를 JSON 파일로 저장
     saveButton.addEventListener("click", async () => {
-        const characters = [];
-        document.querySelectorAll(".characterRowContainer2").forEach((container) => {
-            const name = container.querySelector(".textChar").value;
-            const gender = container.querySelector(".gender").value;
-            const imageSrc = container.querySelector(".previewImage").src || "";
+        try {
+            const characters = await loadFromIndexedDB("characters", "charactersData");
+            if (characters) {
+                const blob = new Blob([JSON.stringify(characters, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
     
-            characters.push({ name, gender, imageSrc });
-        });
+                const downloadLink = document.createElement("a");
+                downloadLink.href = url;
+                downloadLink.download = "characters.json"; // 저장 파일 이름
+                downloadLink.click();
     
-        const blob = new Blob([JSON.stringify(characters, null, 2)], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-    
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "characters.json";
-        a.click();
-    
-        URL.revokeObjectURL(url);
-        alert("캐릭터 데이터를 JSON 파일로 저장했습니다!");
-    });
-
-    // 페이지 로드 시 IndexedDB에서 캐릭터 데이터 불러오기
-    (async () => {
-        const characters = await loadFromIndexedDB("characters", "charactersData");
-
-        if (characters) {
-            characters.forEach((char) => {
-                addCharacter(char.name, char.gender, char.imageSrc);
-            });
+                URL.revokeObjectURL(url);
+                alert("IndexedDB 데이터를 JSON 파일로 저장했습니다!");
+            } else {
+                alert("저장할 데이터가 없습니다.");
+            }
+        } catch (error) {
+            console.error("JSON 파일 저장 중 오류 발생:", error);
         }
-    })();
+    });
 });
 
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        // IndexedDB에서 데이터 로드
+        const characters = await loadFromIndexedDB("characters", "charactersData");
+        console.log("로드된 데이터:", characters);
+
+        const characterRowContainer = document.getElementById("characterRowContainer");
+
+        if (!characterRowContainer) {
+            console.error("#characterRowContainer 요소를 찾을 수 없습니다.");
+            return;
+        }
+
+        if (characters && characters.length > 0) {
+            characterRowContainer.innerHTML = ""; // 기존 콘텐츠 초기화
+
+            characters.forEach(({ name, gender, imageSrc }) => {
+                // HTML 양식에 맞게 캐릭터 데이터 추가
+                const contentDiv = document.createElement("div");
+                contentDiv.classList.add("characterRowContainer2");
+
+                contentDiv.innerHTML = `
+                    <div class="characterRow">
+                        <button type="button" class="deleteChar">캐릭터 삭제</button>
+                        <button type="button" class="addImage">이미지 추가</button>
+                        <button type="button" class="deleteImage">이미지 삭제</button>
+                        이름: <input type="text" class="textChar" value="${name || ''}">
+                        성별: <select name="genderCheck" class="gender">
+                            <option value="남" ${gender === "남" ? "selected" : ""}>남</option>
+                            <option value="여" ${gender === "여" ? "selected" : ""}>여</option>
+                            <option value="무성" ${gender === "무성" ? "selected" : ""}>무성</option>
+                        </select>
+                    </div>
+                    <img class="previewImage" src="${imageSrc || 'default_image.png'}" alt="${name || '이미지 없음'}" style="display:block; width:220px; height:220px; margin-left:10px;">
+                `;
+
+                characterRowContainer.appendChild(contentDiv);
+            });
+
+            console.log("IndexedDB 데이터를 성공적으로 로드하고 출력했습니다.");
+        } else {
+            console.log("IndexedDB에 저장된 데이터가 없습니다.");
+        }
+    } catch (error) {
+        console.error("데이터 로드 및 출력 중 오류 발생:", error);
+    }
+});
+
+
+
+
+
+function addCharacter(name = "", gender = "남", imageSrc = "") {
+    const contentDiv = document.createElement("div");
+    contentDiv.classList.add("characterRowContainer2");
+
+    contentDiv.innerHTML = `
+        <div class="characterRow">
+            <button type="button" class="deleteChar">캐릭터 삭제</button>
+            <button type="button" class="addImage">이미지 추가</button>
+            <button type="button" class="deleteImage">이미지 삭제</button>
+            <label>이름: <input type="text" class="textChar" value="${name}"></label>
+            <label>성별:
+                <select name="genderCheck" class="gender">
+                    <option value="남" ${gender === "남" ? "selected" : ""}>남</option>
+                    <option value="여" ${gender === "여" ? "selected" : ""}>여</option>
+                    <option value="무성" ${gender === "무성" ? "selected" : ""}>무성</option>
+                </select>
+            </label>
+        </div>
+        <img class="previewImage" src="${imageSrc}" alt="이미지 미리보기" style="display:${imageSrc ? "block" : "none"};">
+    `;
+
+    document.getElementById("characterRowContainer").appendChild(contentDiv);
+}

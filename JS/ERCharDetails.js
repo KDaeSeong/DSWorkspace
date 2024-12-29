@@ -50,22 +50,19 @@ window.addEventListener("storage", function (event) {
 });
 
 
-
 const DB_NAME = "HungerGameCharacterData";
-const DB_VERSION = 1; // 버전을 증가시켜 onupgradeneeded 트리거
-
+const DB_DETAILS_NAME = "HungerGameCharDetailsData";
+const DB_VERSION = 1;
 
 // IndexedDB 초기화 함수
-function initIndexedDB() {
+function initIndexedDB(dbName, storeName, keyPath = "id") {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        const request = indexedDB.open(dbName, DB_VERSION);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-
-            // 오브젝트 스토어가 없으면 생성
-            if (!db.objectStoreNames.contains("characters")) {
-                db.createObjectStore("characters", { keyPath: "id" });
+            if (!db.objectStoreNames.contains(storeName)) {
+                db.createObjectStore(storeName, { keyPath });
             }
         };
 
@@ -75,84 +72,153 @@ function initIndexedDB() {
 }
 
 
-// IndexedDB 데이터 저장 함수
-async function saveToIndexedDB(storeName, id, data) {
-    const db = await initIndexedDB();
+async function initializeIndexedDB(dbName, storeName, initialData) {
+    const db = await initIndexedDB(dbName, storeName);
 
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(storeName, "readwrite");
         const store = transaction.objectStore(storeName);
-        store.put({ id, data });
+
+        initialData.forEach(data => {
+            store.put(data); // 데이터를 저장
+        });
 
         transaction.oncomplete = () => resolve();
         transaction.onerror = (event) => reject(event.target.error);
     });
 }
 
-// IndexedDB에서 데이터 로드
-async function loadFromIndexedDB(storeName, id) {
-    const db = await initIndexedDB();
+async function saveToIndexedDB(dbName, storeName, data) {
+    const db = await initIndexedDB(dbName, storeName);
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(storeName, "readwrite");
+        const store = transaction.objectStore(storeName);
+
+        // 데이터를 저장
+        data.forEach(item => store.put(item));
+
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = (event) => reject(event.target.error);
+    });
+}
+
+async function loadCharacterDetails() {
+    try {
+        // IndexedDB에서 데이터 로드
+        const loadedData = await loadFromIndexedDB(DB_DETAILS_NAME, "charDetails");
+        console.log("IndexedDB에서 로드된 데이터:", loadedData);
+
+        const tbody = document.querySelector("#characterTable tbody");
+        tbody.innerHTML = ""; // 기존 테이블 초기화
+
+        // 데이터를 순회하며 테이블에 추가
+        loadedData.forEach(({ physique, attributes, hasResetButton }) => {
+            const row = document.createElement("tr");
+
+            // 체격
+            const physiqueCell = createDropdownCell(["작음", "중간", "큼"], physique || "중간");
+            row.appendChild(physiqueCell);
+
+            // 능력치
+            attributes.forEach(attr => {
+                const attrCell = createDropdownCell(["상", "중", "하"], attr || "중");
+                row.appendChild(attrCell);
+            });
+
+            // 초기화 버튼
+            if (hasResetButton) {
+                const resetCell = document.createElement("td");
+                const resetButton = document.createElement("button");
+                resetButton.textContent = "초기화";
+                resetButton.addEventListener("click", () => {
+                    row.querySelectorAll("select").forEach((select, idx) => {
+                        if (idx === 0) {
+                            select.value = "중간"; // 체격 초기화
+                        } else {
+                            select.value = "중"; // 능력치 초기화
+                        }
+                    });
+                });
+                resetCell.appendChild(resetButton);
+                row.appendChild(resetCell);
+            }
+
+            tbody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("데이터 로드 중 오류 발생:", error);
+    }
+}
+
+
+
+async function loadCharactersFromIndexedDB(dbName = "HungerGameCharacterData", storeName = "characters") {
+    const db = await initIndexedDB(dbName, storeName);
 
     return new Promise((resolve, reject) => {
         const transaction = db.transaction(storeName, "readonly");
         const store = transaction.objectStore(storeName);
-        const request = store.get(id);
-
-        request.onsuccess = (event) => resolve(event.target.result?.data || null);
-        request.onerror = (event) => reject(event.target.error);
-    });
-}
-
-
-const DB_DETAILS_NAME = "HungerGameCharDetailsData";
-const DB_DETAILS_VERSION = 1;
-
-// IndexedDB 초기화 함수
-function initCharDetailsDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_DETAILS_NAME, DB_DETAILS_VERSION);
-
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-
-            // 오브젝트 스토어가 없으면 생성
-            if (!db.objectStoreNames.contains("charDetails")) {
-                db.createObjectStore("charDetails", { keyPath: "id" }); // 키로 id 사용
-            }
-        };
-
-        request.onsuccess = (event) => resolve(event.target.result);
-        request.onerror = (event) => reject(event.target.error);
-    });
-}
-
-// IndexedDB 데이터 저장 함수
-async function saveCharDetailsToDB(data) {
-    const db = await initCharDetailsDB();
-
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction("charDetails", "readwrite");
-        const store = transaction.objectStore("charDetails");
-        store.put(data);
-
-        transaction.oncomplete = () => resolve();
-        transaction.onerror = (event) => reject(event.target.error);
-    });
-}
-
-// IndexedDB 데이터 로드 함수
-async function loadCharDetailsFromDB() {
-    const db = await initCharDetailsDB();
-
-    return new Promise((resolve, reject) => {
-        const transaction = db.transaction("charDetails", "readonly");
-        const store = transaction.objectStore("charDetails");
         const request = store.getAll();
 
-        request.onsuccess = (event) => resolve(event.target.result || []);
-        request.onerror = (event) => reject(event.target.error);
+        request.onsuccess = (event) => {
+            const data = request.result || [];
+            console.log("IndexedDB 데이터 로드 성공:", data); // 디버깅용
+            resolve(data);
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB 데이터 로드 오류:", event.target.error);
+            reject(event.target.error);
+        };
     });
 }
+
+
+
+async function loadFromIndexedDB(dbName, storeName) {
+    const db = await initIndexedDB(dbName, storeName);
+
+    return new Promise((resolve, reject) => {
+        const transaction = db.transaction(storeName, "readonly");
+        const store = transaction.objectStore(storeName);
+        const request = store.getAll(); // 모든 데이터를 가져옴
+
+        request.onsuccess = (event) => resolve(request.result || []);
+        request.onerror = (event) => reject(request.error);
+    });
+}
+
+
+
+// IndexedDB 데이터 저장 함수
+async function saveCharactersToIndexedDB() {
+    const characters = [];
+    document.querySelectorAll(".characterRowContainer2").forEach((container, index) => {
+        const name = container.querySelector(".textChar").value;
+        const gender = container.querySelector(".gender").value;
+        const imageSrc = container.querySelector(".previewImage").src || "";
+
+        characters.push({ id: index, name, gender, imageSrc });
+    });
+
+    try {
+        const db = await initIndexedDB();
+        const transaction = db.transaction("characters", "readwrite");
+        const store = transaction.objectStore("characters");
+
+        characters.forEach(character => {
+            store.put(character);
+        });
+
+        transaction.oncomplete = () => console.log("IndexedDB에 캐릭터 데이터 저장 완료!");
+        transaction.onerror = (event) => console.error("IndexedDB 저장 오류:", event.target.error);
+    } catch (error) {
+        console.error("IndexedDB 저장 중 오류 발생:", error);
+    }
+}
+
 
 
 const saveButton = document.querySelector("#save h1");
@@ -162,51 +228,134 @@ const loadButton = document.querySelector("#load h1");
 // 저장하기 버튼 이벤트
 saveButton.addEventListener("click", async () => {
     const tableData = [];
+
     document.querySelectorAll("#characterTable tbody tr").forEach((row, index) => {
-        const name = row.children[0].textContent;
-
-        // 체격 select 값 읽기
-        const physiqueSelect = row.children[3].querySelector("select");
-        const physique = physiqueSelect ? physiqueSelect.value : "중간";
-
-        // 나머지 능력치 select 값 읽기
+        const physique = row.querySelector("select").value; // 체격 정보
         const attributes = Array.from(row.querySelectorAll("select"))
-            .slice(1) // 체격 이후의 능력치만
-            .map((select) => (select ? select.value : "중"));
+            .slice(1) // 체격 제외
+            .map(select => select.value); // 능력치 정보
 
         tableData.push({
-            id: index, // 각 캐릭터의 고유 ID로 행 인덱스 사용
-            name,
-            physique,
-            attributes,
+            id: index, // 고유 ID 추가
+            physique, // 체격 정보
+            attributes, // 능력치 배열
+            hasResetButton: true // 초기화 버튼 포함 여부
         });
     });
 
-    // IndexedDB에 저장
-    for (const data of tableData) {
-        await saveCharDetailsToDB(data);
+    console.log("저장될 데이터:", tableData); // 디버깅용
+
+    try {
+        await saveToIndexedDB(DB_DETAILS_NAME, "charDetails", tableData);
+
+        const blob = new Blob([JSON.stringify(tableData, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = url;
+        downloadLink.download = "HungerGameCharDetails.json";
+        downloadLink.click();
+
+        URL.revokeObjectURL(url);
+        alert("데이터가 IndexedDB와 JSON 파일로 저장되었습니다!");
+    } catch (error) {
+        console.error("데이터 저장 중 오류 발생:", error);
     }
-
-    // JSON으로 저장
-    const jsonBlob = new Blob([JSON.stringify(tableData, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(jsonBlob);
-
-    const downloadLink = document.createElement("a");
-    downloadLink.href = url;
-    downloadLink.download = "HungerGameCharDetails.json"; // 다운로드 파일 이름
-    downloadLink.click();
-
-    URL.revokeObjectURL(url); // URL 해제
-
-    alert("테이블 데이터가 저장되고 JSON 파일로 다운로드되었습니다!");
 });
 
+async function loadTableData() {
+    try {
+        const characterData = await loadFromIndexedDB("HungerGameCharacterData", "characters");
+        const charDetails = await loadFromIndexedDB("HungerGameCharDetailsData", "charDetails");
+
+        console.log("HungerGameCharacterData:", characterData);
+        console.log("HungerGameCharDetailsData:", charDetails);
+
+        if (!characterData || characterData.length === 0) {
+            console.error("HungerGameCharacterData가 비어 있습니다.");
+            return;
+        }
+
+        if (!charDetails || charDetails.length === 0) {
+            console.error("HungerGameCharDetailsData가 비어 있습니다.");
+            return;
+        }
+
+        // characterData의 'data' 필드에서 실제 데이터를 추출
+        const characterArray = characterData[0]?.data || [];
+        console.log("Character Array:", characterArray);
+
+        const tbody = document.querySelector("#characterTable tbody");
+        tbody.innerHTML = ""; // 기존 테이블 초기화
+
+        characterArray.forEach((character) => {
+            // charDetails에서 해당 ID의 상세 데이터를 찾기
+            const detail = charDetails.find(detail => detail.id === character.id);
+
+            const row = document.createElement("tr");
+
+            // 이름
+            const nameCell = document.createElement("td");
+            nameCell.textContent = character.name || "이름 없음";
+            row.appendChild(nameCell);
+
+            // 성별
+            const genderCell = document.createElement("td");
+            const gender = character.gender === "여" ? "여"
+                          : character.gender === "남" ? "남"
+                          : "무성";
+            genderCell.textContent = gender || "무성";
+            row.appendChild(genderCell);
+
+            // 이미지
+            const imageCell = document.createElement("td");
+            const img = document.createElement("img");
+            img.src = character.imageSrc || "default_image.png";
+            img.alt = `${character.name || "이미지 없음"} 이미지`;
+            img.style.width = "100px";
+            img.style.height = "100px";
+            img.style.objectFit = "cover";
+            imageCell.appendChild(img);
+            row.appendChild(imageCell);
+
+            // 체격
+            const physiqueCell = createDropdownCell(["작음", "중간", "큼"], detail?.physique || "중간");
+            row.appendChild(physiqueCell);
+
+            // 능력치
+            (detail?.attributes || ["중", "중", "중", "중", "중", "중", "중"]).forEach(attr => {
+                const attrCell = createDropdownCell(["상", "중", "하"], attr || "중");
+                row.appendChild(attrCell);
+            });
+
+            // 초기화 버튼
+            const resetCell = document.createElement("td");
+            const resetButton = document.createElement("button");
+            resetButton.textContent = "초기화";
+            resetButton.addEventListener("click", () => {
+                row.querySelectorAll("select").forEach((select, idx) => {
+                    if (idx === 0) {
+                        select.value = "중간"; // 체격 초기화
+                    } else {
+                        select.value = "중"; // 능력치 초기화
+                    }
+                });
+            });
+            resetCell.appendChild(resetButton);
+            row.appendChild(resetCell);
+
+            tbody.appendChild(row);
+        });
+
+    } catch (error) {
+        console.error("데이터 로드 중 오류 발생:", error);
+    }
+}
 
 
 
 
-// 불러오기 버튼 이벤트
-loadButton.addEventListener("click", async () => {
+loadButton.addEventListener("click", () => {
     const fileInput = document.createElement("input");
     fileInput.type = "file";
     fileInput.accept = ".json";
@@ -217,77 +366,52 @@ loadButton.addEventListener("click", async () => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const charDetails = JSON.parse(e.target.result);
+                console.log("로드된 JSON 데이터:", charDetails);
 
-                // HungerGameCharacters 데이터 로드
-                const characters = await loadFromIndexedDB("characters", "charactersData");
+                try {
+                    const tbody = document.querySelector("#characterTable tbody");
+                    tbody.innerHTML = ""; // 기존 테이블 초기화
 
-                const tbody = document.querySelector("#characterTable tbody");
-                tbody.innerHTML = ""; // 기존 테이블 비우기
+                    // JSON 데이터를 순회하며 테이블 업데이트
+                    charDetails.forEach(({ physique, attributes, hasResetButton }, index) => {
+                        const row = document.createElement("tr");
 
-                charDetails.forEach((detail, index) => {
-                    const character = characters ? characters[index] : null;
+                        // 체격
+                        const physiqueCell = createDropdownCell(["작음", "중간", "큼"], physique || "중간");
+                        row.appendChild(physiqueCell);
 
-                    const row = document.createElement("tr");
-
-                    // 이름
-                    const nameCell = document.createElement("td");
-                    nameCell.textContent = detail.name;
-                    row.appendChild(nameCell);
-
-                    // 성별
-                    const genderCell = document.createElement("td");
-                    genderCell.textContent = character && character.gender === "F" ? "여" : "남";
-                    row.appendChild(genderCell);
-
-                    // 이미지
-                    const imageCell = document.createElement("td");
-                    const img = document.createElement("img");
-                    img.src = character ? character.imageSrc : "default_image.png"; // 기본 이미지 처리
-                    img.alt = `${detail.name} 이미지`;
-                    imageCell.appendChild(img);
-                    row.appendChild(imageCell);
-
-                    // 체격
-                    const physiqueCell = createDropdownCell(["작음", "중간", "큼"], detail.physique || "중간");
-                    row.appendChild(physiqueCell);
-
-                    // 나머지 능력치
-                    detail.attributes.forEach((attr) => {
-                        const cell = createDropdownCell(["상", "중", "하"], attr || "중");
-                        row.appendChild(cell);
-                    });
-
-                    // 초기화 버튼
-                    const resetCell = document.createElement("td");
-                    const resetButton = document.createElement("button");
-                    resetButton.textContent = "초기화";
-                    resetButton.addEventListener("click", () => {
-                        // 드롭다운 초기화
-                        row.querySelectorAll("select").forEach((select, idx) => {
-                            if (idx === 0) {
-                                select.value = "중간"; // 체격 초기화
-                            } else {
-                                select.value = "중"; // 나머지 능력치 초기화
-                            }
+                        // 능력치
+                        attributes.forEach(attr => {
+                            const attrCell = createDropdownCell(["상", "중", "하"], attr || "중");
+                            row.appendChild(attrCell);
                         });
+
+                        // 초기화 버튼
+                        if (hasResetButton) {
+                            const resetCell = document.createElement("td");
+                            const resetButton = document.createElement("button");
+                            resetButton.textContent = "초기화";
+                            resetButton.addEventListener("click", () => {
+                                row.querySelectorAll("select").forEach((select, idx) => {
+                                    if (idx === 0) {
+                                        select.value = "중간"; // 체격 초기화
+                                    } else {
+                                        select.value = "중"; // 능력치 초기화
+                                    }
+                                });
+                            });
+                            resetCell.appendChild(resetButton);
+                            row.appendChild(resetCell);
+                        }
+
+                        tbody.appendChild(row);
                     });
-                    resetCell.appendChild(resetButton);
-                    row.appendChild(resetCell);
 
-                    tbody.appendChild(row);
-
-                    // IndexedDB에 저장
-                    const charData = {
-                        id: index,
-                        name: detail.name,
-                        physique: detail.physique || "중간",
-                        attributes: detail.attributes || [],
-                    };
-                    saveCharDetailsToDB(charData);
-                });
-
-                alert("JSON 데이터를 불러오고 테이블을 갱신했습니다!");
+                } catch (error) {
+                    console.error("JSON 데이터 처리 중 오류 발생:", error);
+                }
             };
+
             reader.readAsText(file);
         }
     });
@@ -296,82 +420,14 @@ loadButton.addEventListener("click", async () => {
 });
 
 
-
-// DOMContentLoaded 이벤트
-document.addEventListener("DOMContentLoaded", async () => {
-    const tbody = document.querySelector("#characterTable tbody");
-
-    // IndexedDB에서 데이터 로드
-    const characters = await loadFromIndexedDB("characters", "charactersData"); // HungerGameCharacterData에서 로드
-    const charDetails = await loadCharDetailsFromDB(); // HungerGameCharDetailsData에서 로드
-
-    if (characters && characters.length > 0) {
-        characters.forEach((character, index) => {
-            const row = document.createElement("tr");
-
-            // 이름
-            const nameCell = document.createElement("td");
-            const detail = charDetails.find((detail) => detail.id === index);
-            nameCell.textContent = detail ? detail.name : character.name;
-            row.appendChild(nameCell);
-
-            // 성별
-            const genderCell = document.createElement("td");
-            genderCell.textContent = character.gender === "F" ? "여" : "남";
-            row.appendChild(genderCell);
-
-            // 이미지
-            const imageCell = document.createElement("td");
-            const img = document.createElement("img");
-            img.src = character.imageSrc;
-            img.alt = `${character.name} 이미지`;
-            imageCell.appendChild(img);
-            row.appendChild(imageCell);
-
-            // 체격
-            const physiqueCell = createDropdownCell(
-                ["작음", "중간", "큼"],
-                detail ? detail.physique : "중간"
-            );
-            row.appendChild(physiqueCell);
-
-            // 나머지 능력치
-            ["힘", "민첩성", "손재주", "손놀림", "지략", "사격", "지구력"].forEach((attr, attrIndex) => {
-                const cell = createDropdownCell(
-                    ["상", "중", "하"],
-                    detail && detail.attributes[attrIndex] ? detail.attributes[attrIndex] : "중"
-                );
-                row.appendChild(cell);
-            });
-
-            // 초기화 버튼
-            const resetCell = document.createElement("td");
-            const resetButton = document.createElement("button");
-            resetButton.textContent = "초기화";
-            resetButton.addEventListener("click", () => {
-                // 드롭다운 초기화
-                row.querySelectorAll("select").forEach((select, index) => {
-                    if (index === 0) {
-                        // 첫 번째 드롭다운 (체격) 초기화
-                        select.value = "중간";
-                    } else {
-                        // 나머지 드롭다운 (능력치) 초기화
-                        select.value = "중";
-                    }
-                });
-            });
-            resetCell.appendChild(resetButton);
-            row.appendChild(resetCell);
-
-            tbody.appendChild(row);
-        });
-    } else {
-        console.warn("IndexedDB에서 데이터를 가져올 수 없습니다.");
-    }
+document.addEventListener("DOMContentLoaded", () => {
+    loadCharacterDetails();
+    loadTableData();
 });
 
 
-// 드롭다운 셀 생성 함수
+
+// 드롭다운 셀 생성 함수 (기존 코드 활용)
 function createDropdownCell(options, defaultValue) {
     const cell = document.createElement("td");
     const select = document.createElement("select");
@@ -389,4 +445,3 @@ function createDropdownCell(options, defaultValue) {
     cell.appendChild(select);
     return cell;
 }
-

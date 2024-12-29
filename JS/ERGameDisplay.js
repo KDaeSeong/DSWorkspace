@@ -57,11 +57,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         
         // 매핑 및 초기화
         gameState.players = characterData.data.map((char, index) => {
-            
             const detail = charDetails.find(detail => detail.id === char.id) || {};
             return {
                 ...char,
-                id: `player${index}`, // 'player0', 'player1', ...
+                id: `a${index}`, // 이벤트에서 사용하는 ID 형식으로 변경
                 name: char.name || `플레이어${index + 1}`,
                 isAlive: true,
                 kills: 0,
@@ -82,41 +81,31 @@ document.addEventListener("DOMContentLoaded", async () => {
             };
         });
         
+        
 
         
     // 이벤트 데이터 초기화
     console.log("초기 이벤트 데이터:", eventData);
+    // 이벤트 데이터 초기화 시 killer, killee를 gameState.players에 매핑
     gameState.eventData = (eventData.data || []).map(event => {
-        console.log("처리 중인 이벤트 데이터:", event);
-
-        const killerIds = event.killer
-            .map(id => {
-                const match = id.match(/(\d+)/);
-                return match ? `a${parseInt(match[1], 10) - 1}` : null;
-            })
-            .filter(Boolean);
-
-        const killeeIds = event.killee
-            .map(id => {
-                const match = id.match(/(\d+)/);
-                return match ? `b${parseInt(match[1], 10) - 1}` : null;
-            })
-            .filter(id => id && !killerIds.includes(id)); // 중복 제거
-
-        console.log("초기화된 killer IDs:", killerIds);
-        console.log("초기화된 killee IDs:", killeeIds);
-
-        if (killerIds.length === 0 && killeeIds.length === 0) {
-            console.warn(`유효하지 않은 이벤트 데이터: killer와 killee가 모두 비어 있습니다. 이벤트:`, event);
-            return null; // 무효화된 이벤트
-        }
-
+        const killers = event.killer.map(id => ({
+            id,
+            player: gameState.players.find(player => player.id === id)
+        }));
+        const killees = event.killee.map(id => ({
+            id,
+            player: gameState.players.find(player => player.id === id)
+        }));
         return {
             ...event,
-            killer: killerIds,
-            killee: killeeIds,
+            killer: killers,  // 매핑된 killer 데이터
+            killee: killees,  // 매핑된 killee 데이터
         };
-    }).filter(Boolean);
+    });
+
+    
+    
+
         
     // 보정치 객체 생성
     gameState.modifiers = {
@@ -166,48 +155,88 @@ function updateCharacterStatus(player) {
     }
 }
 
+function getPlayerNameById(playerId, players) {
+    // ID를 고유한 player 형태로 변환
+    const normalizedId = playerId.replace(/^a/, "playerA").replace(/^b/, "playerB").replace(/^c/, "playerC");
+    console.log(`Mapping playerId: ${playerId} to normalizedId: ${normalizedId}`);
+
+    const player = players.find(p => p.id === normalizedId);
+    if (!player) {
+        console.warn(`No player found for ID: ${normalizedId}`);
+    }
+    return player ? player.name : playerId; // 이름이 없으면 원래 ID 반환
+}
+
+
+
 // 이벤트 렌더링
-function renderEvent({ text, images }) {
+function renderEvent({ text, killer, killee, healTarget, images }) {
     const eventDisplay = document.querySelector(".event-display");
     const eventElement = document.createElement("div");
     eventElement.className = "event-appear";
 
-    if (!images || images.length === 0) {
-        console.warn("images 데이터가 비어 있습니다.");
-        eventElement.innerHTML = `<div class="event-text">${text}</div>`;
-    } else {
-        const imagesHtml = images
-        .filter(({ image, name }) => image && name)
-        .map(({ image, name, isAlive }, index) => {
-            return `
-                <div id="event-char-${index}" class="event-char-frame" style="display: inline-block; margin: 0 10px;">
-                    <img 
-                        src="${image}" 
-                        alt="${name}" 
-                        class="event-char-image" 
-                        style="
-                            width: 300px; 
-                            height: 300px; 
-                            object-fit: cover; 
-                            border: 3px solid gold; 
-                            background-color: black; 
-                            ${isAlive === false ? "filter: grayscale(100%);" : ""}
-                        "
-                    >
-                    <div class="event-char-name" style="margin-top: 40px;">${name}</div>
-                </div>
-            `;
-        })
-        .join("");
+    // 텍스트에서 ID를 이름으로 변환
+    text = text.replace(/\ba(\d+)\b/g, (_, id) => getPlayerNameById(`a${id}`, gameState.players));
+    text = text.replace(/\bb(\d+)\b/g, (_, id) => getPlayerNameById(`b${id}`, gameState.players));
+    text = text.replace(/\bc(\d+)\b/g, (_, id) => getPlayerNameById(`c${id}`, gameState.players));
 
-        eventElement.innerHTML = `
-            <div class="event-char">${imagesHtml}</div>
-            <div class="event-text">${text}</div>
-        `;
-    }
+    console.log("Converted text:", text);
+
+    // 이미지 처리
+    const imagesHtml = images
+        .filter(({ image, name }) => image && name)
+        .map(({ image, name, isAlive }, index) => `
+            <div id="event-char-${index}" class="event-char-frame" style="display: inline-block; margin: 0 10px;">
+                <img 
+                    src="${image}" 
+                    alt="${name}" 
+                    class="event-char-image" 
+                    style="
+                        width: 300px; 
+                        height: 300px; 
+                        object-fit: cover; 
+                        border: 3px solid gold; 
+                        background-color: black; 
+                        ${isAlive === false ? "filter: grayscale(100%);" : ""}
+                    "
+                >
+                <div class="event-char-name" style="margin-top: 40px;">${name}</div>
+            </div>
+        `).join("");
+
+    eventElement.innerHTML = `
+        <div class="event-char">${imagesHtml}</div>
+        <div class="event-text">${text}</div>
+    `;
 
     eventDisplay.appendChild(eventElement);
 }
+
+
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        console.log("Loading character data...");
+        let characterData = await loadIndexedDB("HungerGameCharacterData", "characters", "charactersData");
+        console.log("Character data loaded:", characterData);
+
+        let charDetails = await loadIndexedDB("HungerGameCharDetailsData", "charDetails");
+        console.log("Character details loaded:", charDetails);
+
+        gameState.players = characterData.data.map((char, index) => ({
+            ...char,
+            id: `player${index}`,
+            name: char.name || `플레이어${index + 1}`,
+        }));
+
+        console.log("Initialized players:", gameState.players);
+    } catch (error) {
+        console.error("Error initializing game:", error);
+    }
+});
+
+
+
+
 
 function determineEventType(event) {
     if (event.healTarget && event.healTarget !== "X") {
@@ -226,7 +255,6 @@ function determineEventType(event) {
         }
     }
 
-    console.log("전투 이벤트로 분류되지 않은 이벤트:", event.textEvent);
     return "기타";
 }
 
@@ -504,7 +532,7 @@ function updateGamePhase() {
             eventDisplay.innerHTML = `
                 <div style="
                     text-align: center; 
-                    font-size: 40px; 
+                    font-size: 80px; 
                     font-weight: bold; 
                     padding: 20px; 
                     background-color: #f4f4f4; 
@@ -546,13 +574,14 @@ function updateGamePhase() {
                         gap: 20px;
                     ">
                         <img src="${winner.image}" alt="${winner.name}" 
-                             style="width: 150px; 
-                                    height: 150px; 
+                             style="width: 600px; 
+                                    height: 600px; 
                                     object-fit: cover; 
                                     border: 3px solid gold; 
+                                    margin: 100px;
                                     border-radius: 10px;">
                         <div>
-                            <h2 style="margin: 0; font-size: 24px; color: #333;">
+                            <h2 style="margin: 0; font-size: 60px; font-weight: bold; color: #333;">
                                 1위: ${winner.name} (${winner.kills} 킬)
                             </h2>
                         </div>
@@ -576,12 +605,13 @@ function updateGamePhase() {
                     playerElement.style.textAlign = "center";
                     playerElement.innerHTML = `
                         <img src="${player.image}" alt="${player.name}" 
-                             style="width: 100px; 
-                                    height: 100px; 
+                             style="width: 300px; 
+                                    height: 300px; 
                                     object-fit: cover; 
                                     border: 3px solid #ddd; 
+                                    margin: 30px;
                                     border-radius: 10px;">
-                        <div style="margin-top: 5px; font-size: 14px; color: #333;">
+                        <div style="margin-top: 5px; font-size: 40px; color: #333;">
                             ${player.name} (${player.kills} 킬)
                         </div>
                     `;
