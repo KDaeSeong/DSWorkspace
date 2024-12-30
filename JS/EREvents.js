@@ -138,10 +138,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         const newRow = document.createElement("tr");
         newRow.innerHTML = `
             <td><textarea class="long-input" rows="5" cols="70" style="resize: none;" readonly>${textEvent}</textarea></td>
-            <td><input type="text" class="short-input" value="${killer.join(", ") || "X"}" readonly></td>
-            <td><input type="text" class="short-input" value="${killee.join(", ") || "X"}" readonly></td>
+            <td><input type="text" class="short-input" value="${killer.join(", ") || ""}" readonly></td>
+            <td><input type="text" class="short-input" value="${killee.join(", ") || ""}" readonly></td>
             <td><input type="checkbox" ${heal ? "checked" : ""} disabled></td>
-            <td><input type="text" class="short-input" value="${healTarget || "X"}" readonly></td>
+            <td><input type="text" class="short-input" value="${healTarget || ""}" readonly></td>
             <td>
                 <select class="short-select" disabled>
                     <option value="낮" ${dayNight === "낮" ? "selected" : ""}>낮</option>
