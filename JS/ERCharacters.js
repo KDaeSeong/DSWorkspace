@@ -338,10 +338,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
-
-
-
-
 function addCharacter(name = "", gender = "남", imageSrc = "") {
     const contentDiv = document.createElement("div");
     contentDiv.classList.add("characterRowContainer2");

@@ -83,11 +83,11 @@ header a{
 
 .title-text {
     position: absolute;
-    top: 50%;
+    top: 55%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1; /* 이미지 뒤에 표시되도록 설정 */
-    font-size: 120px;
+    font-size: 110px;
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
