@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 function determineEventType(event) {
-    if (event.healTarget && event.healTarget !== "X") {
+    if (event.healTarget && event.healTarget !== "") {
         return "생존";
     }
 
@@ -549,6 +549,7 @@ function updateGamePhase() {
 
 
 // 이벤트 처리 로직 개선
+
 function processPhase(phase) {
     if (!gameState.killerLogs) {
         gameState.killerLogs = [];
@@ -574,86 +575,179 @@ function processPhase(phase) {
 
     for (let i = 0; i < eventCount; i++) {
         const event = eligibleEvents[Math.floor(Math.random() * eligibleEvents.length)];
-        const eventType = determineEventType(event.textEvent);
-
-        let killers = [];
-        let killees = [];
-
-        // Killers 및 Killees 처리
-        if (event.textEvent.includes("a0") || event.textEvent.includes("b0")) {
-            killers = event.killer.map((_, idx) => getRandomWeightedPlayer(gameState.players, usedPlayers, eventType));
-            killees = event.killee.map((_, idx) => {
-                let killee;
-                let retries = 0;
-
-                do {
-                    killee = getRandomWeightedPlayer(gameState.players, usedPlayers, eventType, killers[idx]?.id);
-                    retries++;
-                } while (retries < 3 && (!killee || killers[idx]?.id === killee.id));
-
-                return killee;
-            });
-
-            // 검증
-            if (killers.some(k => !k) || killees.some(k => !k) || killers.some((k, idx) => k?.id === killees[idx]?.id)) {
-                console.warn("Invalid Killer or Killee detected. Skipping event.");
-                continue;
-            }
+        
+        if (event.textEvent.includes("돼지를 잡고 돼지고기를 얻었습니다")) {
+            processResourceEvent(event);
+        } else if (event.healTarget) {
+            processHealEvent(event, usedPlayers);
         }
-
-        // Kill 카운트 증가
-        killers.forEach(killer => {
-            if (killer) {
-                killer.kills = (killer.kills || 0) + (killees.length || 0);
-            }
-        });
-
-        // 텍스트 변환
-        let eventText = event.textEvent;
-
-        killers.forEach((killer, idx) => {
-            eventText = eventText.replace(new RegExp(`a${idx}`, "g"), `a${killer.id}`);
-        });
-
-        killees.forEach((killee, idx) => {
-            eventText = eventText.replace(new RegExp(`b${idx}`, "g"), `b${killee.id}`);
-        });
-
-        console.log("Selected Killers:", killers.map(k => k?.id || "N/A"));
-        console.log("Selected Killees:", killees.map(k => k?.id || "N/A"));
-        console.log(`Generated Event Text Before Render: ${eventText}`);
-
-        gameState.killerLogs.push(eventText);
-
-        // Render Event
-        renderEvent({
-            text: eventText,
-            images: [
-                ...killers.map(killer => ({
-                    image: killer.image,
-                    name: killer.name,
-                    isAlive: killer.isAlive,
-                })),
-                ...killees.map(killee => ({
-                    image: killee.image,
-                    name: killee.name,
-                    isAlive: false,
-                    deathDay: gameState.dayCount + 1 // 다음날 제거를 위해 설정
-                })),
-            ],
-        });
-
-        // 킬리 상태 업데이트
-        killees.forEach(killee => {
-            if (killee) {
-                killee.isAlive = false;
-                killee.deathDay = gameState.dayCount;
-                markCharacterForRemoval(killee);
-                updateCharacterStatus(killee);
-            }
-        });
     }
 }
+
+
+function processResourceEvent(event) {
+    const playerIdMatch = event.textEvent.match(/c(\d+)/);
+    if (!playerIdMatch) {
+        console.warn("No valid player ID found in resource event.");
+        return;
+    }
+
+    const playerId = playerIdMatch[1];
+    const player = gameState.players.find((p) => p.id === playerId);
+
+    if (!player) {
+        console.warn(`Player with ID c${playerId} not found.`);
+        return;
+    }
+
+    // 자원 업데이트
+    player.resources = player.resources || {};
+    player.resources.pork = (player.resources.pork || 0) + 1;
+
+    let eventText = event.textEvent.replace(`c${playerId}`, player.name);
+
+    console.log(`Resource event processed for player ${player.name}: ${eventText}`);
+
+    gameState.killerLogs.push(eventText);
+
+    renderEvent({
+        text: eventText,
+        images: [
+            {
+                image: player.image,
+                name: player.name,
+                isAlive: player.isAlive,
+            },
+        ],
+    });
+}
+
+
+
+function processKillerKilleeEvent(event, usedPlayers) {
+    const eventType = determineEventType(event.textEvent);
+    let killers = [];
+    let killees = [];
+
+    killers = event.killer.map((_, idx) =>
+        getRandomWeightedPlayer(gameState.players, usedPlayers, eventType)
+    );
+    killees = event.killee.map((_, idx) => {
+        let killee;
+        let retries = 0;
+
+        do {
+            killee = getRandomWeightedPlayer(
+                gameState.players,
+                usedPlayers,
+                eventType,
+                killers[idx]?.id
+            );
+            retries++;
+        } while (retries < 3 && (!killee || killers[idx]?.id === killee.id));
+
+        return killee;
+    });
+
+    if (
+        killers.some((k) => !k) ||
+        killees.some((k) => !k) ||
+        killers.some((k, idx) => k?.id === killees[idx]?.id)
+    ) {
+        console.warn("Invalid Killer or Killee detected. Skipping event.");
+        return;
+    }
+
+    killers.forEach((killer) => {
+        if (killer) {
+            killer.kills = (killer.kills || 0) + (killees.length || 0);
+        }
+    });
+
+    killees.forEach((killee) => {
+        if (killee) {
+            killee.isAlive = false;
+            killee.deathDay = gameState.dayCount;
+            markCharacterForRemoval(killee);
+            updateCharacterStatus(killee);
+        }
+    });
+
+    let eventText = event.textEvent;
+    killers.forEach((killer, idx) => {
+        eventText = eventText.replace(new RegExp(`a${idx}`, "g"), killer.name);
+    });
+    killees.forEach((killee, idx) => {
+        eventText = eventText.replace(new RegExp(`b${idx}`, "g"), killee.name);
+    });
+
+    gameState.killerLogs.push(eventText);
+
+    renderEvent({
+        text: eventText,
+        images: [
+            ...killers.map((killer) => ({
+                image: killer.image,
+                name: killer.name,
+                isAlive: killer.isAlive,
+            })),
+            ...killees.map((killee) => ({
+                image: killee.image,
+                name: killee.name,
+                isAlive: false,
+            })),
+        ],
+    });
+}
+
+function processHealEvent(event, usedPlayers) {
+    // healTarget 유효성 검사
+    if (typeof event.healTarget !== "string") {
+        console.warn("healTarget is not a valid string:", event.healTarget);
+        return;
+    }
+
+    const healTargetMatch = event.healTarget.match(/c(\d+)/);
+    if (!healTargetMatch) {
+        console.warn("No valid heal target ID found in event:", event.healTarget);
+        return;
+    }
+
+    const targetId = healTargetMatch[1];
+    const healTarget = gameState.players.find((p) => p.id === targetId);
+
+    if (!healTarget) {
+        console.warn(`Heal target with ID c${targetId} not found.`);
+        return;
+    }
+
+    // Heal target 업데이트
+    healTarget.isAlive = true;
+    healTarget.deathDay = null;
+
+    let eventText = event.textEvent.replace(`c${targetId}`, healTarget.name);
+
+    console.log(`Heal event processed for target ${healTarget.name}: ${eventText}`);
+
+    // 킬 로그 업데이트
+    gameState.killerLogs.push(eventText);
+
+    // 이벤트 렌더링
+    renderEvent({
+        text: eventText,
+        images: [
+            {
+                image: healTarget.image,
+                name: healTarget.name,
+                isAlive: healTarget.isAlive,
+            },
+        ],
+    });
+}
+
+
+
+
 
 // 다음날 캐릭터 제거 예약
 function markCharacterForRemoval(player) {
