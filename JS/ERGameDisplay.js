@@ -87,25 +87,18 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 이벤트 데이터 초기화
     console.log("초기 이벤트 데이터:", eventData);
     // 이벤트 데이터 초기화 시 killer, killee를 gameState.players에 매핑
-    gameState.eventData = (eventData.data || []).map((event, index) => {
-        const killers = event.killer.map(id => ({
+    gameState.eventData = (eventData.data || []).map((event) => {
+        const killers = (event.killer || []).map((id) => ({
             id,
-            player: gameState.players.find(player => player.id === id)
+            player: gameState.players.find((p) => p.id === id),
         }));
-        const killees = event.killee.map(id => ({
+        const killees = (event.killee || []).map((id) => ({
             id,
-            player: gameState.players.find(player => player.id === id)
+            player: gameState.players.find((p) => p.id === id),
         }));
+        const healTarget = event.healTarget ? gameState.players.find((p) => p.id === event.healTarget) : null;
     
-        console.log(`Event ${index + 1} Initial Data:`);
-        console.log("Killers:", killers);
-        console.log("Killees:", killees);
-    
-        return {
-            ...event,
-            killer: killers,
-            killee: killees,
-        };
+        return { ...event, killer: killers, killee: killees, healTarget };
     });
     
 
@@ -549,7 +542,6 @@ function updateGamePhase() {
 
 
 // 이벤트 처리 로직 개선
-
 function processPhase(phase) {
     if (!gameState.killerLogs) {
         gameState.killerLogs = [];
@@ -575,14 +567,19 @@ function processPhase(phase) {
 
     for (let i = 0; i < eventCount; i++) {
         const event = eligibleEvents[Math.floor(Math.random() * eligibleEvents.length)];
-        
-        if (event.textEvent.includes("돼지를 잡고 돼지고기를 얻었습니다")) {
-            processResourceEvent(event);
-        } else if (event.healTarget) {
+
+        if (event.killer && event.killer.length > 0 && event.killee && event.killee.length > 0) {
+            console.log(`Processing Killer/Killee event: ${event.textEvent}`);
+            processKillerKilleeEvent(event, usedPlayers);
+        } else if (event.healTarget && event.healTarget.length > 0) {
+            console.log(`Processing HealTarget event: ${event.textEvent}`);
             processHealEvent(event, usedPlayers);
+        } else {
+            console.warn("Unknown or unsupported event type:", event.textEvent);
         }
     }
 }
+
 
 
 function processResourceEvent(event) {
@@ -623,32 +620,30 @@ function processResourceEvent(event) {
 }
 
 
-
 function processKillerKilleeEvent(event, usedPlayers) {
     const eventType = determineEventType(event.textEvent);
     let killers = [];
     let killees = [];
 
-    killers = event.killer.map((_, idx) =>
+    // Killer 선택
+    killers = event.killer.map((_, idx) => 
         getRandomWeightedPlayer(gameState.players, usedPlayers, eventType)
     );
+
+    // Killee 선택
     killees = event.killee.map((_, idx) => {
         let killee;
         let retries = 0;
 
         do {
-            killee = getRandomWeightedPlayer(
-                gameState.players,
-                usedPlayers,
-                eventType,
-                killers[idx]?.id
-            );
+            killee = getRandomWeightedPlayer(gameState.players, usedPlayers, eventType, killers[idx]?.id);
             retries++;
         } while (retries < 3 && (!killee || killers[idx]?.id === killee.id));
 
         return killee;
     });
 
+    // 선택 실패 시 이벤트 무시
     if (
         killers.some((k) => !k) ||
         killees.some((k) => !k) ||
@@ -658,12 +653,14 @@ function processKillerKilleeEvent(event, usedPlayers) {
         return;
     }
 
+    // Killers의 Kill 카운트 증가
     killers.forEach((killer) => {
         if (killer) {
-            killer.kills = (killer.kills || 0) + (killees.length || 0);
+            killer.kills = (killer.kills || 0) + killees.length;
         }
     });
 
+    // Killees를 죽은 상태로 업데이트
     killees.forEach((killee) => {
         if (killee) {
             killee.isAlive = false;
@@ -673,6 +670,7 @@ function processKillerKilleeEvent(event, usedPlayers) {
         }
     });
 
+    // 텍스트 업데이트
     let eventText = event.textEvent;
     killers.forEach((killer, idx) => {
         eventText = eventText.replace(new RegExp(`a${idx}`, "g"), killer.name);
@@ -681,8 +679,12 @@ function processKillerKilleeEvent(event, usedPlayers) {
         eventText = eventText.replace(new RegExp(`b${idx}`, "g"), killee.name);
     });
 
+    console.log(`Event processed: ${eventText}`);
+
+    // 킬 로그 추가
     gameState.killerLogs.push(eventText);
 
+    // 이벤트 렌더링
     renderEvent({
         text: eventText,
         images: [
@@ -701,52 +703,38 @@ function processKillerKilleeEvent(event, usedPlayers) {
 }
 
 function processHealEvent(event, usedPlayers) {
-    // healTarget 유효성 검사
-    if (typeof event.healTarget !== "string") {
-        console.warn("healTarget is not a valid string:", event.healTarget);
-        return;
-    }
+    const healTargets = event.healTarget.map((id) => gameState.players.find((p) => p.id === id));
 
-    const healTargetMatch = event.healTarget.match(/c(\d+)/);
-    if (!healTargetMatch) {
-        console.warn("No valid heal target ID found in event:", event.healTarget);
-        return;
-    }
+    healTargets.forEach((healTarget) => {
+        if (!healTarget || healTarget.isAlive) {
+            console.warn("Heal target is invalid or already alive:", healTarget);
+            return;
+        }
 
-    const targetId = healTargetMatch[1];
-    const healTarget = gameState.players.find((p) => p.id === targetId);
+        // Heal target 업데이트
+        healTarget.isAlive = true;
+        healTarget.deathDay = null;
 
-    if (!healTarget) {
-        console.warn(`Heal target with ID c${targetId} not found.`);
-        return;
-    }
+        let eventText = event.textEvent.replace(new RegExp(`h${event.healTarget.indexOf(healTarget.id)}`, "g"), healTarget.name);
 
-    // Heal target 업데이트
-    healTarget.isAlive = true;
-    healTarget.deathDay = null;
+        console.log(`Heal event processed for target ${healTarget.name}: ${eventText}`);
 
-    let eventText = event.textEvent.replace(`c${targetId}`, healTarget.name);
+        // 이벤트 로그 업데이트
+        gameState.killerLogs.push(eventText);
 
-    console.log(`Heal event processed for target ${healTarget.name}: ${eventText}`);
-
-    // 킬 로그 업데이트
-    gameState.killerLogs.push(eventText);
-
-    // 이벤트 렌더링
-    renderEvent({
-        text: eventText,
-        images: [
-            {
-                image: healTarget.image,
-                name: healTarget.name,
-                isAlive: healTarget.isAlive,
-            },
-        ],
+        // 이벤트 렌더링
+        renderEvent({
+            text: eventText,
+            images: [
+                {
+                    image: healTarget.image,
+                    name: healTarget.name,
+                    isAlive: healTarget.isAlive,
+                },
+            ],
+        });
     });
 }
-
-
-
 
 
 // 다음날 캐릭터 제거 예약
