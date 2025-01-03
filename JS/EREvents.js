@@ -132,7 +132,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const killer = document.getElementById("popupKiller").value.split(",").map(item => item.trim());
         const killee = document.getElementById("popupKillee").value.split(",").map(item => item.trim());
         const heal = document.getElementById("popupHeal").checked;
-        const healTarget = document.getElementById("popupHealTarget").value;
+        const benefitTarget = document.getElementById("popupbenefitTarget").value;
         const dayNight = document.getElementById("popupDayNight").value;
     
         const newRow = document.createElement("tr");
@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             <td><input type="text" class="short-input" value="${killer.join(", ") || ""}" readonly></td>
             <td><input type="text" class="short-input" value="${killee.join(", ") || ""}" readonly></td>
             <td><input type="checkbox" ${heal ? "checked" : ""} disabled></td>
-            <td><input type="text" class="short-input" value="${healTarget || ""}" readonly></td>
+            <td><input type="text" class="short-input" value="${benefitTarget || ""}" readonly></td>
             <td>
                 <select class="short-select" disabled>
                     <option value="낮" ${dayNight === "낮" ? "selected" : ""}>낮</option>
@@ -180,13 +180,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const healCheckbox = row.querySelector("input[type='checkbox']");
                 const dayNightSelect = row.querySelector("select.short-select");
     
-                const killer = inputs[0]?.value.split(",").map(item => item.trim()) || [];
-                const killee = inputs[1]?.value.split(",").map(item => item.trim()) || [];
+                const killer = inputs[0]?.value ? inputs[0]?.value.split(",").map(item => item.trim()) : [];
+                const killee = inputs[1]?.value ? inputs[1]?.value.split(",").map(item => item.trim()) : [];
                 const heal = healCheckbox?.checked || false;
-                const healTarget = inputs[2]?.value || "";
+                const benefitTarget = inputs[2]?.value ? [inputs[2]?.value.trim()] : [];
                 const dayNight = dayNightSelect?.value || "";
     
-                eventData.push({ textEvent, killer, killee, heal, healTarget, dayNight });
+                eventData.push({ textEvent, killer, killee, heal, benefitTarget, dayNight });
             });
     
             if (eventData.length === 0) {
@@ -206,7 +206,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
     });
     
-    
     loadButton.addEventListener("click", () => {
         const input = document.createElement("input");
         input.type = "file";
@@ -222,7 +221,15 @@ document.addEventListener("DOMContentLoaded", async () => {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 try {
-                    const savedData = JSON.parse(e.target.result);
+                    let savedData = JSON.parse(e.target.result);
+    
+                    // 필드 이름 변경 및 빈 값 처리
+                    savedData = savedData.map(event => ({
+                        ...event,
+                        killer: event.killer || [],
+                        killee: event.killee || [],
+                        benefitTarget: event.benefitTarget || [], // benefitTarget을 benefitTarget으로 변경
+                    }));
     
                     // IndexedDB에 저장
                     await saveToIndexedDB("events", "eventsData", savedData);
@@ -236,7 +243,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                             <td><input type="text" class="short-input" value="${event.killer.join(", ")}" readonly></td>
                             <td><input type="text" class="short-input" value="${event.killee.join(", ")}" readonly></td>
                             <td><input type="checkbox" ${event.heal ? "checked" : ""} disabled></td>
-                            <td><input type="text" class="short-input" value="${event.healTarget}" readonly></td>
+                            <td><input type="text" class="short-input" value="${event.benefitTarget.join(", ")}" readonly></td>
                             <td>
                                 <select class="short-select" disabled>
                                     <option value="낮" ${event.dayNight === "낮" ? "selected" : ""}>낮</option>
@@ -260,6 +267,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         input.click();
     });
     
+    
 });
 
 function saveToJSONFile(data, fileName) {
@@ -273,6 +281,9 @@ function saveToJSONFile(data, fileName) {
 }
 
 // 페이지 로드 시 IndexedDB에서 이벤트 데이터 불러오기
+
+// IndexedDB에서 데이터 로드 시
+// IndexedDB에서 데이터 로드 시
 document.addEventListener("DOMContentLoaded", async () => {
     const tableBody = document.querySelector("#adEventDiv table tbody");
 
@@ -284,10 +295,10 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const newRow = document.createElement("tr");
                 newRow.innerHTML = `
                     <td><textarea class="long-input" rows="5" cols="70" style="resize: none;" readonly>${event.textEvent}</textarea></td>
-                    <td><input type="text" class="short-input" value="${event.killer}" readonly></td>
-                    <td><input type="text" class="short-input" value="${event.killee}" readonly></td>
+                    <td><input type="text" class="short-input" value="${event.killer.join(", ")}" readonly></td>
+                    <td><input type="text" class="short-input" value="${event.killee.join(", ")}" readonly></td>
                     <td><input type="checkbox" ${event.heal ? "checked" : ""} disabled></td>
-                    <td><input type="text" class="short-input" value="${event.healTarget}" readonly></td>
+                    <td><input type="text" class="short-input" value="${event.benefitTarget.join(", ")}" readonly></td>
                     <td>
                         <select class="short-select" disabled>
                             <option value="낮" ${event.dayNight === "낮" ? "selected" : ""}>낮</option>
@@ -298,13 +309,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     <td><input type="checkbox" class="delete-checkbox"></td>`;
                 tableBody.appendChild(newRow);
             });
-
         }
     } catch (error) {
         console.error("IndexedDB에서 데이터를 불러오는 중 오류 발생:", error);
         alert("IndexedDB에서 데이터를 불러오는 중 오류가 발생했습니다.");
     }
 });
+
 
 
 

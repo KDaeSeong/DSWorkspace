@@ -4,7 +4,7 @@
     "killer": "0",
     "killee": "1",
     "heal": false,
-    "healTarget": "X",
+    "benefitTarget": "X",
     "dayNight": "전체"
   },
   {
@@ -12,7 +12,7 @@
     "killer": "0",
     "killee": "1",
     "heal": false,
-    "healTarget": "X",
+    "benefitTarget": "X",
     "dayNight": "밤"
   },
   {
@@ -20,7 +20,7 @@
     "killer": "0",
     "killee": "1",
     "heal": false,
-    "healTarget": "X",
+    "benefitTarget": "X",
     "dayNight": "전체"
   },
   {
@@ -28,7 +28,7 @@
     "killer": "0",
     "killee": "1",
     "heal": false,
-    "healTarget": "X",
+    "benefitTarget": "X",
     "dayNight": "전체"
   },
   {
@@ -36,7 +36,7 @@
     "killer": "0",
     "killee": "1",
     "heal": false,
-    "healTarget": "X",
+    "benefitTarget": "X",
     "dayNight": "전체"
   }
 ]

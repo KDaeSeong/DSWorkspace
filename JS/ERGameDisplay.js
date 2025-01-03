@@ -87,6 +87,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 이벤트 데이터 초기화
     console.log("초기 이벤트 데이터:", eventData);
     // 이벤트 데이터 초기화 시 killer, killee를 gameState.players에 매핑
+    console.log("Player IDs:", gameState.players.map(p => p.id));
+
+    // benefitTarget 초기화 시 ID 변환
     gameState.eventData = (eventData.data || []).map((event) => {
         const killers = (event.killer || []).map((id) => ({
             id,
@@ -96,10 +99,17 @@ document.addEventListener("DOMContentLoaded", async () => {
             id,
             player: gameState.players.find((p) => p.id === id),
         }));
-        const healTarget = event.healTarget ? gameState.players.find((p) => p.id === event.healTarget) : null;
-    
-        return { ...event, killer: killers, killee: killees, healTarget };
+        const benefitTargets = (event.benefitTarget || []).map((id) => {
+            // 숫자 또는 문자열로 변환 (필요 시)
+            const normalizedId = id.replace('c', ''); // "c0" -> "0"
+            return gameState.players.find((p) => p.id === normalizedId) ? normalizedId : null;
+        }).filter(Boolean);
+
+        return { ...event, killer: killers, killee: killees, benefitTarget: benefitTargets };
     });
+
+    
+    
     
 
     
@@ -115,6 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.log(`Event ${index + 1}: ${event.textEvent}`);
         console.log("Killers:", event.killer);
         console.log("Killees:", event.killee);
+        console.log("benefitTarget:", event.benefitTarget);
     });
 
 
@@ -175,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 function determineEventType(event) {
-    if (event.healTarget && event.healTarget !== "") {
+    if (event.benefitTarget && event.benefitTarget.length > 0) {
         return "생존";
     }
 
@@ -211,11 +222,9 @@ function getRandomSubsetForAllPlayers(players, events, usedPlayers) {
 // 데이터를 기반으로 killer와 killee를 선정하고 이벤트를 처리하는 로직
 function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = null) {
     const validPlayers = players.filter(
-        (player) =>
-            player.isAlive &&
-            !usedPlayers.has(player.id) &&
-            player.id !== excludeId // 동일 ID 제외
+        (player) => player.isAlive && !usedPlayers.has(player.id)
     );
+    console.log("Valid players for selection:", validPlayers);
 
     if (validPlayers.length === 0) {
         console.error("No valid players available. excludeId:", excludeId);
@@ -553,6 +562,8 @@ function processPhase(phase) {
         (event) => event.dayNight === phase || event.dayNight === "전체"
     );
 
+    console.log(`Eligible events for phase '${phase}':`, eligibleEvents);
+
     const alivePlayers = gameState.players.filter((player) => player.isAlive);
 
     if (alivePlayers.length <= 1) {
@@ -571,14 +582,15 @@ function processPhase(phase) {
         if (event.killer && event.killer.length > 0 && event.killee && event.killee.length > 0) {
             console.log(`Processing Killer/Killee event: ${event.textEvent}`);
             processKillerKilleeEvent(event, usedPlayers);
-        } else if (event.healTarget && event.healTarget.length > 0) {
-            console.log(`Processing HealTarget event: ${event.textEvent}`);
-            processHealEvent(event, usedPlayers);
+        } else if (event.benefitTarget && event.benefitTarget.length > 0) {
+            console.log(`Processing benefitTarget event: ${event.textEvent}`);
+            processBenefitEvent(event, usedPlayers);
         } else {
             console.warn("Unknown or unsupported event type:", event.textEvent);
         }
     }
 }
+
 
 
 
@@ -702,22 +714,30 @@ function processKillerKilleeEvent(event, usedPlayers) {
     });
 }
 
-function processHealEvent(event, usedPlayers) {
-    const healTargets = event.healTarget.map((id) => gameState.players.find((p) => p.id === id));
+function processBenefitEvent(event, usedPlayers) {
+    const benefitTargets = event.benefitTarget.map((id) => {
+        const player = gameState.players.find((p) => p.id === id);
+        if (!player) {
+            console.warn(`Benefit target with ID '${id}' not found.`);
+        }
+        return player;
+    }).filter(Boolean); // 유효한 값만 필터링
 
-    healTargets.forEach((healTarget) => {
-        if (!healTarget || healTarget.isAlive) {
-            console.warn("Heal target is invalid or already alive:", healTarget);
-            return;
+    console.log("Benefit targets before processing:", benefitTargets);
+
+    benefitTargets.forEach((benefitTarget) => {
+        if (!benefitTarget || usedPlayers.has(benefitTarget.id)) {
+            console.warn(`Skipping benefitTarget: ${benefitTarget?.name || "unknown"}`);
+            return; // 이미 이벤트에 참여한 경우 건너뜀
         }
 
-        // Heal target 업데이트
-        healTarget.isAlive = true;
-        healTarget.deathDay = null;
+        // Benefit 적용
+        benefitTarget.hasBenefit = true;
+        usedPlayers.add(benefitTarget.id); // 사용된 캐릭터 추가
 
-        let eventText = event.textEvent.replace(new RegExp(`h${event.healTarget.indexOf(healTarget.id)}`, "g"), healTarget.name);
+        const eventText = event.textEvent.replace(new RegExp(`c${benefitTarget.id}`, "g"), benefitTarget.name);
 
-        console.log(`Heal event processed for target ${healTarget.name}: ${eventText}`);
+        console.log(`Benefit event applied to: ${benefitTarget.name}`);
 
         // 이벤트 로그 업데이트
         gameState.killerLogs.push(eventText);
@@ -727,14 +747,15 @@ function processHealEvent(event, usedPlayers) {
             text: eventText,
             images: [
                 {
-                    image: healTarget.image,
-                    name: healTarget.name,
-                    isAlive: healTarget.isAlive,
+                    image: benefitTarget.image,
+                    name: benefitTarget.name,
+                    isAlive: benefitTarget.isAlive,
                 },
             ],
         });
     });
 }
+
 
 
 // 다음날 캐릭터 제거 예약
