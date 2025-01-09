@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERGameDisplay</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/ERGameDisplay.css">
+</head>
+<body>
+    <img class="background-image" src="../Images/ERMap.webp" alt="배경 이미지">
+    <main>
+        <header>
+            <div id="day-night-display">
+                <div class="day-gradient">
+                <div class="night-gradient">
+
+                </div>
+                <h1>참가 플레이어</h1>
+            </div>
+        </header>
+        <div id="player-display" class="player-display">
+            <!-- 참가 플레이어 이미지와 이름 -->
+        </div>
+        <div class="event-display">
+            <!-- 이벤트 출력 -->
+            <div id="event-header" class="event-header">
+                <h1></h1>
+            </div>
+            <div id="event-content" class="event-content">
+                <!-- 이벤트 내용이 여기에 표시됩니다. -->
+            </div>
+        </div>
+        <div>
+            <a id="proceed">
+                <h1>진행하기</h1>
+            </a>
+        </div>
+    </main>
+    
+    <script src="../JS/ERGameDisplay.js"></script>
+    
+</body>
+</html>

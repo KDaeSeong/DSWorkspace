@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EREvents</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/EREvents.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const loginCheck = localStorage.getItem('loginCheck') === "true";
+            if (loginCheck) {
+                document.getElementById("openLogin").innerHTML = "내 정보";
+                document.getElementById("openSignIn").innerText = "로그아웃";
+                document.getElementById("login").style.cursor = "pointer";
+            }else {
+                document.getElementById("openLogin").innerText = "로그인";
+                document.getElementById("openSignIn").innerText = "회원가입";
+                document.getElementById("login").style.cursor = "pointer";
+                }
+            });
+    </script>
+</head>
+<body>
+    <main>
+        <header>
+            <section id="header-id1">
+                <ul>
+                    <li><a href="#">
+                        <img src="../Images/ERLogo.webp" alt="" width="40%">
+                    </a></li>
+                    <li><a href="ERMain.html">메인</a></li>
+                    <li><a href="ERCharacters.html">캐릭터 설정</a></li>
+                    <li><a href="ERCharDetails.html" id="settingCharDetail">캐릭터 상세설정</a></li>
+                    <li><a href="EREvents.html" id="EREvent">이벤트 설정</a></li>
+                    <li><a href="ERModifiers.html">보정치 설정</a></li>
+                </ul>
+                <ul>
+                </ul>
+                <ul id="login">
+                    <li><a id="openLogin"></a></li>
+                    <li><a id="openSignIn"></a></li>
+                </ul>
+            </section>
+        </header>
+        <div class="police-container">
+            <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
+            <h1 class="title-text">이벤트</h1>
+        </div>
+        <div>
+            <div class="mainText">
+                    이곳에서는 이벤트를 추가/제거할 수 있습니다.
+                    <br><br>
+                    이벤트는 낮/밤을 기준으로 나뉘며 낮/밤 전체에 발동하는 이벤트를 만들 수도 있습니다.
+                    <br><br>
+                    플레이어 번호는 0번부터 시작하여 1씩 증가합니다.
+
+
+            </div>
+        </div>
+        
+        <div>
+            <div class="police-container">
+                <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
+                <h1 class="title-text">이벤트 설정</h1>
+            </div>
+            <pre>
+            </pre>
+
+        </div>
+        <div id="adEventDiv">
+            <table border="1px">
+                <thead>
+                    <tr>
+                        <th id="eventTh">이벤트</th>
+                        <th width="300px">살인자</th>
+                        <th width="300px">사망자</th>
+                        <th width="120px">체력 회복</th>
+                        <th width="300px">이로운 효과 대상자</th>
+                        <th width="100px">조건</th>
+                        <th>삭제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <div id="popupForm" style="display: none; position: fixed; top: 10%; left: 50%; transform: translate(-50%, 0); width: 600px; background-color: white; padding: 30px; border: 1px solid #ccc; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); z-index: 1000;">
+                <h2>이벤트 추가</h2>
+                <form id="eventForm">
+                    이벤트:
+                    <textarea name="eventName" rows="5" cols="70" style="resize: none;" required></textarea><br><br>
+            
+                    <label for="popupKiller">살인자:</label><br>
+                    <input type="text" id="popupKiller" class="short-input"><br><br>
+            
+                    <label for="popupKillee">사망자:</label><br>
+                    <input type="text" id="popupKillee" class="short-input"><br><br>
+            
+                    <label for="popupHeal">체력 회복:</label>
+                    <input type="checkbox" id="popupHeal"><br><br>
+            
+                    <label for="popupbenefitTarget">이로운 효과 대상자:</label><br>
+                    <input type="text" id="popupbenefitTarget" class="short-input"><br><br>
+            
+                    <label for="popupDayNight">조건:</label><br>
+                    <select id="popupDayNight" class="short-select">
+                        <option value="낮">낮</option>
+                        <option value="밤">밤</option>
+                        <option value="전체">전체</option>
+                    </select><br><br>
+            
+                    <button type="submit" class="popup-btn">추가</button>
+                    <button type="button" id="closePopup" class="popup-btn">취소</button>
+                </form>
+            </div>
+            
+        </div>
+        
+        <div id="addBtn">
+            <button type="button" id="addEvent">이벤트 추가</button>
+            <button type="button" id="deleteEvent">이벤트 삭제</button>
+        </div>
+        
+        <div id="saveBtn">
+            <div id="load">
+                <a>
+                    <h1>불러오기</h1>
+                </a>
+            </div>
+            <div id="save">
+                <a>
+                    <h1>저장하기</h1>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="../JS/EREvents.js"></script>
+</body>
+</html>

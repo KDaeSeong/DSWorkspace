@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>20_로그인연습문제</title>
+    <style>
+        form .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100px;
+            margin-bottom: 10px;
+            margin-top: 10px;
+        }
+
+        button.btn:hover {
+            opacity: 0.8;
+            color: yellow;
+        }
+
+        .cancel:hover {
+            opacity: 0.8;
+            background: red;
+        }
+
+        input{
+            width: 200px;
+        }
+
+        fieldset{
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+<body>
+    <div class="form-popup">
+        <form id="myForm">
+            <fieldset>
+                <legend>로그인</legend>
+
+                <h1>로그인</h1>
+
+                <label for="id"><b>아이디</b></label>
+                <input type="text" placeholder="아이디 입력" name="id" required id="id">
+                <br>
+
+                <label for="psw"><b>비밀번호</b></label>
+                <input type="password" placeholder="비밀번호 입력" name="psw" required id="psw">
+                <br>
+
+                <button type="submit" class="btn">로그인</button>
+                <button type="button" class="btn cancel">닫기</button>
+            </fieldset>
+        </form>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        // 1. label 태그는 가로로 '80px' 크기를 갖는다.
+         const loginForm = document.getElementById("myForm")
+         loginForm.style.display = 'flex';
+        const label = document.getElementsByTagName("label")
+        const fieldset = document.querySelector("fieldset")
+        for (lab of label){
+            lab.style.width = "80px"
+            lab.style.display = "inline-block";
+        }
+
+        // 2. Close 버튼을 클릭하면 로그인 화면이 사라진다.
+        const closeForm = document.querySelector(".cancel")
+        closeForm.addEventListener("click", function() {
+            loginForm.style.display = 'none';
+        })
+
+
+
+        let db;
+        const request = indexedDB.open("HungerGameUserDB", 1);
+
+        request.onupgradeneeded = function (event) {
+            db = event.target.result;
+            if (!db.objectStoreNames.contains("users")) {
+                db.createObjectStore("users", { keyPath: "id" });
+            }
+        };
+
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            console.log("Database opened successfully");
+        };
+
+        request.onerror = function (event) {
+            console.error("Database error:", event.target.errorCode);
+        };
+
+        // 3. 로그인에 성공하면 특정 페이지로 이동한다.
+        document.getElementById("myForm").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+
+
+        const id = document.getElementById("id").value;
+        const pw = document.getElementById("psw").value;
+        const hashedPw = hashPassword(pw);
+
+        const transaction = db.transaction(["users"], "readonly");
+        const store = transaction.objectStore("users");
+        const request = store.get(id);
+
+        request.onsuccess = function (event) {
+            const user = event.target.result;
+            if (!user) {
+                alert("존재하지 않는 아이디입니다.");
+                return;
+            }
+
+            if (user.password === hashedPw) {
+                alert("로그인 성공!");
+                localStorage.setItem('loginCheck', "true");
+                localStorage.setItem('loginId', id);
+                if (window.opener) {
+                    window.opener.postMessage("loginSuccess", "*");
+                }
+                window.close();
+            } else {
+                alert("비밀번호가 일치하지 않습니다.");
+            }
+        };
+
+            request.onerror = function (event) {
+                console.error("Error during login:", event.target.errorCode);
+                alert("로그인 중 오류가 발생했습니다. 다시 시도해주세요.");
+            };
+        });
+
+        function hashPassword(password) {
+            return CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
+        }
+        console.log(hashPassword(password));
+    </script>
+    
+</body>
+</html>

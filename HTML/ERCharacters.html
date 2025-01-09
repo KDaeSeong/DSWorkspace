@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERCharacters</title>
+    <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-square.css" rel="stylesheet">
+    <link rel="stylesheet" href="../CSS/ERCharacters.css">
+</head>
+<body>
+    <main>
+        <header>
+            <section id="header-id1">
+                <ul>
+                    <li><a href="#">
+                        <img src="../Images/ERLogo.webp" alt="" width="40%">
+                    </a></li>
+                    <li><a href="ERMain.html">메인</a></li>
+                    <li><a href="ERCharacters.html" id="ERChar">캐릭터 설정</a></li>
+                    <li><a href="ERCharDetails.html" id="settingCharDetail">캐릭터 상세설정</a></li>
+                    <li><a href="EREvents.html">이벤트 설정</a></li>
+                    <li><a href="ERModifiers.html">보정치 설정</a></li>
+                </ul>
+                <ul>
+                </ul>
+                <ul id="login">
+                    <li><a id="openLogin"></a></li>
+                    <li><a id="openSignIn"></a></li>
+                </ul>
+            </section>
+        </header>
+        <div class="police-container">
+            <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
+            <h1 class="title-text">캐릭터</h1>
+        </div>
+        <div>
+            <div class="mainText">
+                이곳에서는 캐릭터를 추가하고 캐릭터의 속성을 설정할 수 있습니다.
+                <br><br>
+                캐릭터의 속성은 이벤트 보정치에 영향을 미칩니다.
+                <br><br>
+                예를 들어 여성 캐릭터의 경우 남성 캐릭터에 비해 근력 보정을 덜 받습니다. 반면 손재주 보정은 남성 캐릭터에 비해 더 받습니다.
+            </div>
+        </div>
+        <div class="police-container">
+            <img src="../Images/PoliceLine.png" alt="PoliceLine" class="police-line">
+            <h1 class="title-text">캐릭터 추가 및 수정, 삭제</h1>
+        </div>
+        <div id="addCharacter">
+            <div id="characterRowContainer">
+                <!-- <div class="characterRowContainer2" style="margin: 0px; padding: 0px; box-sizing: border-box;">
+                    <div class="characterRow">
+                        <button type="button" id="deleteChar">캐릭터 삭제</button>
+                        <button type="button" id="addImage">이미지 추가</button>
+                        <button type="button" id="deleteImage">이미지 삭제</button>
+                        이름 : <input type="text" id="textChar">
+                        성별 : <select name="genderCheck" id="gender">
+                            <option value="M">남</option>
+                            <option value="F">여</option>
+                            <option value="N">무성</option>
+                        </select>
+                    </div>
+                    <img class="previewImage" src="" alt="이미지 미리보기" style="display:none; width:220px; height:220px; margin-left:10px;">
+                </div> -->
+            </div> 
+        </div>
+        <div id="addBtn">
+            <button type="button" id="addChar">캐릭터 추가</button>
+        </div>
+        <div id="saveBtn">
+            <div id="load">
+                <a>
+                    <h1>불러오기</h1>
+                </a>
+            </div>
+            <div id="save">
+                <a>
+                    <h1>저장하기</h1>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="../JS/ERCharacters.js"></script>
+
+</body>
+</html>

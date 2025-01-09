@@ -1,0 +1,14 @@
+{
+  "combat": 1,
+  "defense": 1,
+  "vitality": 1,
+  "spirit": 1,
+  "intelligence": 1,
+  "stamina": 1,
+  "animal": 1,
+  "weed": 1,
+  "cooking": 1.6,
+  "handiness": true,
+  "hunting": true,
+  "climate": true
+}
