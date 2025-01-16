@@ -149,6 +149,7 @@ document.getElementById("userName").addEventListener("keyup", function(){
     }
 });
 
+
 document.getElementById("searchAddress").addEventListener("click", (event) => {
     // 기본 동작 막기
     event.preventDefault();

@@ -1,8 +1,7 @@
 body{
     background-color: rgb(223, 199, 168);
-    width: 1920px;
-    height: auto;
     box-sizing: border-box;
+    margin: 0;
 }
 
 main{
