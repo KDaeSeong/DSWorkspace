@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+// indexedDB 초기화
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 async function initIndexedDB(dbName, storeName) {
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(dbName, 1);
@@ -19,6 +23,10 @@ async function initIndexedDB(dbName, storeName) {
     });
 }
 
+<<<<<<< HEAD
+=======
+// indexedDB 로드
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 async function loadIndexedDB(dbName, storeName, key = null) {
     const db = await initIndexedDB(dbName, storeName);
     return new Promise((resolve, reject) => {
@@ -99,12 +107,20 @@ document.addEventListener("DOMContentLoaded", async () => {
             id,
             player: gameState.players.find((p) => p.id === id),
         }));
+<<<<<<< HEAD
         const benefitTargets = (event.benefitTarget || []).map((id) => {
             // 숫자 또는 문자열로 변환 (필요 시)
             const normalizedId = id.replace('c', ''); // "c0" -> "0"
             return gameState.players.find((p) => p.id === normalizedId) ? normalizedId : null;
         }).filter(Boolean);
 
+=======
+        const benefitTargets = (event.benefitTarget || []).map((id) => ({
+            id,
+            player: gameState.players.find((p) => p.id === id),
+        }));
+    
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
         return { ...event, killer: killers, killee: killees, benefitTarget: benefitTargets };
     });
 
@@ -145,7 +161,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // 게임 상태 객체
 let gameState = {
+<<<<<<< HEAD
     phase: "day",
+=======
+    phase: "dayFirst",
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     dayCount: 1,
     players: [],
     eventData: [],
@@ -157,9 +177,13 @@ let gameState = {
     killerLogs: [], // 추가
 };
 
+<<<<<<< HEAD
 
 
 
+=======
+// 캐릭터 데이터 로드
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         console.log("Loading character data...");
@@ -181,10 +205,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 });
 
+<<<<<<< HEAD
 
 
 
 
+=======
+// 이벤트 타입을 이벤트 텍스트에 따라 결정
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function determineEventType(event) {
     if (event.benefitTarget && event.benefitTarget.length > 0) {
         return "생존";
@@ -205,6 +233,7 @@ function determineEventType(event) {
     return "기타";
 }
 
+<<<<<<< HEAD
 
 function getRandomSubsetForAllPlayers(players, events, usedPlayers) {
     const playerEvents = [];
@@ -223,14 +252,28 @@ function getRandomSubsetForAllPlayers(players, events, usedPlayers) {
 function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = null) {
     const validPlayers = players.filter(
         (player) => player.isAlive && !usedPlayers.has(player.id)
+=======
+// 데이터를 기반으로 killer와 killee를 선정하고 이벤트를 처리하는 로직
+function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = null) {
+    const validPlayers = players.filter(
+        (player) => player.isAlive && !usedPlayers.has(player.id) && player.id !== excludeId
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     );
     console.log("Valid players for selection:", validPlayers);
 
     if (validPlayers.length === 0) {
+<<<<<<< HEAD
         console.error("No valid players available. excludeId:", excludeId);
         return null;
     }
 
+=======
+        console.error("No valid players available.");
+        return null;
+    }
+
+
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     const weights = validPlayers.map((player) => {
         const stats = player.stats || {};
         switch (eventType) {
@@ -245,6 +288,7 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
         }
     });
 
+<<<<<<< HEAD
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     if (totalWeight === 0) {
         console.error("All players have zero weight.");
@@ -252,6 +296,12 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
     }
 
     let randomValue = Math.random() * totalWeight;
+=======
+
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    let randomValue = Math.random() * totalWeight;
+
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     for (let i = 0; i < validPlayers.length; i++) {
         randomValue -= weights[i];
         if (randomValue <= 0) {
@@ -264,8 +314,12 @@ function getRandomWeightedPlayer(players, usedPlayers, eventType, excludeId = nu
     return null;
 }
 
+<<<<<<< HEAD
 
 // 무작위 하위 집합 선택
+=======
+// 무작위 이벤트 집합 선택
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function getRandomSubsetWithDuplicates(array, size) {
     const result = [];
     for (let i = 0; i < size; i++) {
@@ -275,9 +329,26 @@ function getRandomSubsetWithDuplicates(array, size) {
     return result;
 }
 
+<<<<<<< HEAD
 
 // 캐릭터 이미지 렌더링
 
+=======
+// 무작위 캐릭터 집합 선택
+function getRandomSubsetForAllPlayers(players, events, usedPlayers) {
+    const playerEvents = [];
+    players.forEach((player) => {
+        if (player.isAlive && !usedPlayers.has(player.id)) {
+            const randomEvent = events[Math.floor(Math.random() * events.length)];
+            usedPlayers.add(player.id);
+            playerEvents.push({ player, event: randomEvent });
+        }
+    });
+    return playerEvents;
+}
+
+// 캐릭터 이미지 렌더링
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function renderCharacterImages(players) {
     console.log("렌더링할 플레이어 데이터:", players);
     const playerDisplay = document.getElementById("player-display");
@@ -311,6 +382,7 @@ function renderCharacterImages(players) {
     console.log("플레이어 이미지 렌더링 완료");
 }
 
+<<<<<<< HEAD
 
 const proceedButton = document.getElementById("proceed");
 proceedButton.addEventListener("click", () => {
@@ -318,6 +390,14 @@ proceedButton.addEventListener("click", () => {
 });
 
 
+=======
+// 버튼을 누르면 페이즈 진행
+document.getElementById("proceed").addEventListener("click", () => {
+    updateGamePhase();
+});
+
+// 게임 페이즈를 전환하는 함수
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function updateGamePhase() {
     const display = document.getElementById("day-night-display");
     const eventDisplay = document.querySelector(".event-display");
@@ -530,27 +610,43 @@ function updateGamePhase() {
     display.innerHTML = "";
     eventDisplay.innerHTML = "";
     console.log(gameState.phase);
+<<<<<<< HEAD
     if (gameState.phase === "day") {
+=======
+    if (gameState.phase === "day" || gameState.phase === "dayFirst" ) {
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
         display.innerHTML = `<h1>${gameState.dayCount}일차 낮</h1>`;
         gameState.phase = "night";
         console.log("낮 모드 적용");
         display.classList.remove("night-mode");
         display.classList.add("day-mode");
+<<<<<<< HEAD
         processPhase("밤");
+=======
+        processPhase("낮");
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     } else {
         display.innerHTML = `<h1>${gameState.dayCount}일차 밤</h1>`;
         gameState.phase = "day";
         display.classList.add("night-mode");
         display.classList.remove("day-mode");
         console.log("밤 모드 적용");
+<<<<<<< HEAD
         processPhase("낮");
+=======
+        processPhase("밤");
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
         gameState.dayCount++;
     }
 }
 
+<<<<<<< HEAD
 
 
 // 이벤트 처리 로직 개선
+=======
+// 이벤트 처리 로직 개선 함수
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function processPhase(phase) {
     if (!gameState.killerLogs) {
         gameState.killerLogs = [];
@@ -573,8 +669,14 @@ function processPhase(phase) {
         return;
     }
 
+<<<<<<< HEAD
     let usedPlayers = new Set();
     const eventCount = Math.min(alivePlayers.length, 5);
+=======
+    const usedPlayers = new Set(); // 이벤트에 참여한 플레이어 추적
+    const maxEventCount = 100; // 이벤트 최대 실행 수
+    const eventCount = Math.min(alivePlayers.length, maxEventCount); // 최대 이벤트 실행 수 제한
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 
     for (let i = 0; i < eventCount; i++) {
         const event = eligibleEvents[Math.floor(Math.random() * eligibleEvents.length)];
@@ -586,14 +688,210 @@ function processPhase(phase) {
             console.log(`Processing benefitTarget event: ${event.textEvent}`);
             processBenefitEvent(event, usedPlayers);
         } else {
+<<<<<<< HEAD
             console.warn("Unknown or unsupported event type:", event.textEvent);
+=======
+            console.error("Unknown or unsupported event type:", event);
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
         }
     }
 }
 
+<<<<<<< HEAD
 
 
 
+=======
+// 킬러와 킬리의 이벤트를 처리하는 함수
+function processKillerKilleeEvent(event, usedPlayers) {
+    const eventType = determineEventType(event.textEvent);
+    let killers = [];
+    let killees = [];
+
+    // Killer 선택
+    killers = event.killer.map(() =>
+        getRandomWeightedPlayer(
+            gameState.players.filter((player) => !usedPlayers.has(player.id)),
+            usedPlayers,
+            eventType
+        )
+    );
+
+    // Killee 선택
+    killees = event.killee.map(() => {
+        let killee;
+        let retries = 0;
+
+        do {
+            killee = getRandomWeightedPlayer(
+                gameState.players.filter((player) => !usedPlayers.has(player.id)),
+                usedPlayers,
+                eventType,
+                killers[0]?.id // 같은 이벤트의 Killer 제외
+            );
+            retries++;
+        } while (retries < 3 && (!killee || killers.some((k) => k.id === killee.id)));
+
+        return killee;
+    });
+
+    // 선택된 플레이어를 usedPlayers에 추가
+    killers.forEach((killer) => {
+        if (killer) usedPlayers.add(killer.id);
+    });
+    killees.forEach((killee) => {
+        if (killee) usedPlayers.add(killee.id);
+    });
+
+    // 나머지 로직 동일
+    if (
+        killers.some((k) => !k) ||
+        killees.some((k) => !k) ||
+        killers.some((k, idx) => k?.id === killees[idx]?.id)
+    ) {
+        console.warn("Invalid Killer or Killee detected. Skipping event.");
+        return;
+    }
+
+    // Killers의 Kill 카운트 증가
+    killers.forEach((killer) => {
+        if (killer) {
+            killer.kills = (killer.kills || 0) + killees.length;
+        }
+    });
+
+    // Killees를 죽은 상태로 업데이트
+    killees.forEach((killee) => {
+        if (killee) {
+            killee.isAlive = false;
+            killee.deathDay = gameState.dayCount;
+            markCharacterForRemoval(killee);
+            updateCharacterStatus(killee);
+        }
+    });
+
+    // 이벤트 텍스트 업데이트
+    let eventText = event.textEvent;
+    killers.forEach((killer, idx) => {
+        eventText = eventText.replace(new RegExp(`a${idx}`, "g"), killer.name);
+    });
+    killees.forEach((killee, idx) => {
+        eventText = eventText.replace(new RegExp(`b${idx}`, "g"), killee.name);
+    });
+
+    console.log(`Event processed: ${eventText}`);
+
+    // 킬 로그 추가
+    gameState.killerLogs.push(eventText);
+
+    // 이벤트 렌더링
+    renderEvent({
+        text: eventText,
+        images: [
+            ...killers.map((killer) => ({
+                image: killer.image,
+                name: killer.name,
+                isAlive: killer.isAlive,
+            })),
+            ...killees.map((killee) => ({
+                image: killee.image,
+                name: killee.name,
+                isAlive: false,
+            })),
+        ],
+    });
+}
+
+// 이로운 효과 이벤트를 처리하는 함수
+function processBenefitEvent(event, usedPlayers) {
+    console.log("Processing BenefitTarget Event:", event);
+
+    // 텍스트에 있는 모든 `cn` 패턴 추출
+    const idPattern = /c(\d+)/g; // c<숫자> 패턴
+    const matches = Array.from(event.textEvent.matchAll(idPattern));
+    if (matches.length === 0) {
+        console.warn("No valid IDs found in event text.");
+        return;
+    }
+
+    console.log("Found IDs in Event Text:", matches.map((match) => match[0]));
+
+    let eventText = event.textEvent;
+    const benefitTargetsArray = []; // 여러 benefitTarget 저장 배열
+
+    // 각 ID에 대해 처리
+    matches.forEach((match) => {
+        const targetId = match[1]; // 매칭된 ID
+        console.log(`Processing ID: ${targetId}`);
+
+        // 사용되지 않은 플레이어 중 선택
+        const benefitTargets = gameState.players.filter(
+            (player) => player.isAlive && !usedPlayers.has(player.id)
+        );
+
+        if (benefitTargets.length === 0) {
+            console.warn("No valid benefit targets available for ID:", targetId);
+            return;
+        }
+
+        // 무작위로 플레이어 선택
+        const randomIndex = Math.floor(Math.random() * benefitTargets.length);
+        const benefitTarget = benefitTargets[randomIndex];
+
+        if (!benefitTarget) {
+            console.warn("No valid benefitTarget found for ID:", targetId);
+            return;
+        }
+
+        console.log("Selected BenefitTarget ID:", benefitTarget.id);
+        console.log("Selected BenefitTarget Name:", benefitTarget.name);
+
+        // 선택된 플레이어를 usedPlayers에 추가
+        usedPlayers.add(benefitTarget.id);
+
+        // 텍스트 내의 ID를 이름으로 대체
+        eventText = eventText.replace(
+            new RegExp(`c${targetId}`, "g"),
+            benefitTarget.name
+        );
+
+        // 배열에 추가
+        benefitTargetsArray.push({
+            id: benefitTarget.id,
+            name: benefitTarget.name,
+            image: benefitTarget.image,
+            isAlive: benefitTarget.isAlive,
+        });
+    });
+
+    // 유효 대상이 없는 경우 처리
+    if (benefitTargetsArray.length === 0) {
+        console.warn("No valid benefit targets found for this event.");
+        return;
+    }
+
+    console.log("Final Updated Event Text:", eventText);
+    console.log("Benefit Targets Array:", benefitTargetsArray);
+
+    // 이벤트 로그 업데이트
+    gameState.killerLogs.push({
+        text: eventText,
+        benefitTargets: benefitTargetsArray,
+    });
+
+    // 이벤트 렌더링
+    renderEvent({
+        text: eventText,
+        images: benefitTargetsArray.map((target) => ({
+            image: target.image,
+            name: target.name,
+            isAlive: target.isAlive,
+        })),
+    });
+}
+
+// 자원 획득 이벤트를 처리하는 함수
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 function processResourceEvent(event) {
     const playerIdMatch = event.textEvent.match(/c(\d+)/);
     if (!playerIdMatch) {
@@ -631,6 +929,7 @@ function processResourceEvent(event) {
     });
 }
 
+<<<<<<< HEAD
 
 function processKillerKilleeEvent(event, usedPlayers) {
     const eventType = determineEventType(event.textEvent);
@@ -758,6 +1057,8 @@ function processBenefitEvent(event, usedPlayers) {
 
 
 
+=======
+>>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 // 다음날 캐릭터 제거 예약
 function markCharacterForRemoval(player) {
     player.removeNextDay = true;
