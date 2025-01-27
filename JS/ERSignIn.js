@@ -153,10 +153,6 @@ document.getElementById("userName").addEventListener("keyup", function(){
     }
 });
 
-<<<<<<< HEAD
-=======
-
->>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
 document.getElementById("searchAddress").addEventListener("click", (event) => {
     // 기본 동작 막기
     event.preventDefault();

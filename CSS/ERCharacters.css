@@ -2,10 +2,7 @@ body{
     background-color: rgb(223, 199, 168);
 }
 
-
-
 main{
-    width: max-content;
     height: 2000px;
     margin:auto;
     background-color: rgb(223, 199, 168);
@@ -47,8 +44,8 @@ header ul{
 
 
 header a{
-    font-size: 35px;
-    width: 300px;
+    font-size: 22px;
+    width: 150px;
     height: 100%;
     text-align: center;
     color: black;
@@ -77,17 +74,17 @@ header a{
     position: absolute;
     left: 0;
     width: 100%;
-    height: 200%; /* 부모 높이에 맞게 설정 */
+    height: 100%; /* 부모 높이에 맞게 설정 */
     z-index: 1; /* 텍스트보다 아래 */
 }
 
 .title-text {
     position: absolute;
-    top: 55%;
+    top: 20%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1; /* 이미지 뒤에 표시되도록 설정 */
-    font-size: 110px;
+    font-size: 80px;
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
