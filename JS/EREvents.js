@@ -183,11 +183,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 const killer = inputs[0]?.value ? inputs[0]?.value.split(",").map(item => item.trim()) : [];
                 const killee = inputs[1]?.value ? inputs[1]?.value.split(",").map(item => item.trim()) : [];
                 const heal = healCheckbox?.checked || false;
-<<<<<<< HEAD
-                const benefitTarget = inputs[2]?.value ? [inputs[2]?.value.trim()] : [];
-=======
                 const benefitTarget = inputs[2]?.value ? inputs[2]?.value.split(",").map(item => item.trim()) : [];
->>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
                 const dayNight = dayNightSelect?.value || "";
     
                 eventData.push({ textEvent, killer, killee, heal, benefitTarget, dayNight });
@@ -232,11 +228,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ...event,
                         killer: event.killer || [],
                         killee: event.killee || [],
-<<<<<<< HEAD
-                        benefitTarget: event.benefitTarget || [], // benefitTarget을 benefitTarget으로 변경
-=======
                         benefitTarget: event.benefitTarget || [], 
->>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
                     }));
     
                     // IndexedDB에 저장

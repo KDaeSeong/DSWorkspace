@@ -13,11 +13,7 @@
 document.getElementById("id").addEventListener("keyup", function(){
 
     // const regExp = /^[a-z]([a-z]|[A-Z]|\d|-|_){5,13}$/;
-<<<<<<< HEAD
-    const regExp = /^[a-z]([a-z]|[A-Z]|\d|-|_]){5,13}$/;
-=======
     const regExp = /^[a-z](a-zA-Z\d\-\_){5,13}$/;
->>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     if(this.value == ''){
         this.style.backgroundColor = "white";
         this.style.color = "black";
@@ -208,11 +204,7 @@ document.getElementById("myForm").addEventListener("submit", async function (eve
     }
 
     const phoneCheck = document.getElementById("phone");
-<<<<<<< HEAD
-    const phoneRegExp = /^([010]|[02]|[0]\d\d)-\d{4}-\d{4}$/;
-=======
     const phoneRegExp = /^(010|02|0\d\d)-\d{4}-\d{4}$/;
->>>>>>> c2cbc3ced56b7ae3577305038f11e309910736d9
     if (phoneCheck.value === "") {
         alert("전화번호를 입력해주세요.");
         return false;
