@@ -1,17 +1,15 @@
 body{
     background-color: rgb(223, 199, 168);
+    margin: 0;
 }
 
 main{
-    height: 2000px;
     margin:auto;
     background-color: rgb(223, 199, 168);
     box-sizing: border-box;
 }
 
 header{
-    width: 100%;
-    height: 100px;
     display: flex;
     position:sticky;
     top: 0;
@@ -44,8 +42,8 @@ header ul{
 
 
 header a{
-    font-size: 22px;
-    width: 150px;
+    font-size: 1.4em;
+    width: 180px;
     height: 100%;
     text-align: center;
     color: black;
@@ -66,8 +64,6 @@ header a{
     position: relative;
     width: 100%;
     height: 200px; /* 부모 컨테이너 높이 설정 */
-    margin-bottom: 400px;
-    margin-top: 200px;
 }
 
 .police-line {
@@ -80,11 +76,11 @@ header a{
 
 .title-text {
     position: absolute;
-    top: 20%;
+    top: 30%;
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 1; /* 이미지 뒤에 표시되도록 설정 */
-    font-size: 80px;
+    font-size: 3em;
     font-weight: bold;
     color: white;
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
@@ -114,14 +110,7 @@ header a{
 }
 
 pre{
-    /* font-family: 'NanumSquareLight'; */
-    /* font-family: 'NanumSquare'; */
-    /* font-family: 'NanumSquareBold'; */
-    /* font-family: 'NanumSquareExtraBold'; */
     font-family: 'NanumSquareAcb';
-    /* font-family: 'NanumSquareAceb'; */
-    /* font-family: 'NanumSquareAcl'; */
-    /* font-family: 'NanumSquareAcr'; */
     font-size: 30px;
     letter-spacing: 2px;
     line-height: 32px;
@@ -143,19 +132,16 @@ header li>a:hover{
     color: rgb(255, 255, 255);
 }
 
-
-
-#addChar{
-    margin: auto;
-}
-
 #addBtn{
     display: flex;
     align-items: center;
+    justify-content: center;
 }
+
 
 #addCharacter{
     display: flex;
+    margin: 200px 0;
     justify-content: center;
     
 }
@@ -191,9 +177,9 @@ header li>a:hover{
 }
 
 .previewImage {
-    display: none;
     width: 220px;
     height: 220px;
+    display: flex;
     margin-top: 10px;
     object-fit: cover;
     border: 1px solid #ddd;
@@ -217,9 +203,9 @@ header li>a:hover{
 }
 
 .mainText{
-    width: 1600px;
-    margin: auto;
-    font-size: 50px;
+    margin: 100px 0;
+    font-size: 2em;
+    text-align: center;
     font-family: NanumSquareAcb;
 }
 
